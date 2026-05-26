@@ -99,8 +99,17 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
 .status-line{font-family:var(--mono);font-size:.55rem;color:var(--text3);text-align:center;padding:4px;border-top:1px solid var(--border);flex-shrink:0}
 .app-wrap{display:flex;flex-direction:column;height:100%}
 .app-wrap.hidden{display:none}
-.other-input{display:none;margin-top:6px}
-.other-input.show{display:block}
+.other-input{display:none;margin-top:6px}.other-input.show{display:block}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.58rem}
+.tbl th{background:var(--accent2);color:#fff;padding:6px 4px;text-align:center;position:sticky;top:0;z-index:2;white-space:nowrap}
+.tbl td{padding:5px 3px;text-align:center;border-bottom:1px solid var(--bg3)}
+.tbl .td-name{text-align:left;white-space:nowrap;font-weight:700;font-size:.62rem}
+.tbl input[type=number]{width:32px;padding:4px 2px;border:1px solid var(--border);border-radius:3px;background:var(--bg2);color:var(--accent);font-family:var(--mono);font-size:.65rem;text-align:center;-webkit-appearance:none;-moz-appearance:textfield}
+.tbl input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+.tbl .day-off{background:var(--orange-bg)}
+.tbl .sum-col{background:var(--green-bg);font-weight:700;color:var(--green);font-size:.65rem}
+.tbl .money{font-size:.6rem;color:var(--gold)}
 </style>
 </head>
 <body>
@@ -119,28 +128,27 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex
 <div class="header"><div class="header-left"><div class="sdot"></div><div><div class="logo">СФЕРА HR</div><div class="logo-sub">АЭРОМАР</div></div></div><div class="header-right"><span class="role-badge" id="roleBadge">—</span><span class="htime" id="clock">--:--</span><button class="logout-btn" id="logoutBtn">⏻</button></div></div>
 <div class="tabs" id="tabsBar"></div>
 <div class="content" id="app"></div>
-<div class="status-line">СФЕРА HR v2.1 · Аэромар</div>
+<div class="status-line">СФЕРА HR v3.0 · Аэромар</div>
 </div>
 <div class="modal-overlay" id="mo"><div class="modal" id="mb"></div></div>
 <script>
 const POSITIONS=[
-{id:'kompl',name:'Комплектовщик бортового питания',rate:325,rateReturn:335,count:15,dept:'Производство'},
-{id:'moy',name:'Оператор моечной установки',rate:315,rateReturn:0,count:15,dept:'Мойка'},
-{id:'ubor',name:'Уборщик помещений',rate:310,rateReturn:0,count:15,dept:'Уборка'},
-{id:'gruz',name:'Грузчик',rate:340,rateReturn:0,count:5,dept:'Склад'},
-{id:'other',name:'Другое…',rate:0,rateReturn:0,count:0,dept:''}
+{id:'kompl',name:'Комплектовщик бортового питания',rate:325,rate2:335,count:15,dept:'Производство'},
+{id:'moy',name:'Оператор моечной установки',rate:315,rate2:0,count:15,dept:'Мойка'},
+{id:'ubor',name:'Уборщик помещений',rate:310,rate2:0,count:15,dept:'Уборка'},
+{id:'gruz',name:'Грузчик',rate:340,rate2:0,count:5,dept:'Склад'},
+{id:'other',name:'Другое…',rate:0,rate2:0,count:0,dept:''}
 ];
-const DEPTS=['Производство','Мойка','Уборка','Склад'];
-const REJECT_REASONS=['Не прошёл СБ','Не прошёл медосмотр','Не явился на собеседование','Отказался от условий','Не подошёл по возрасту','Уволен за нарушение','Другое…'];
-const HOSTEL_RATE=300; // руб/сут
-const SHIFT_HOURS=11;
-const VAHTA_DAYS=45;
+const REJECT_REASONS=['Не прошёл СБ','Не прошёл медосмотр','Не явился','Отказался от условий','Не подошёл по возрасту','Уволен за нарушение','Другое…'];
+const CFG={mrot:27800,vahtaK:1.5,ndfl:0.13,vznosy:0.302,compSmena:700,normHours:11,vahtaDays:45,workDays:39,hostelRate:300,aeroRate:576.4};
+CFG.nachislVahta=CFG.mrot*CFG.vahtaK;
+CFG.normHoursTotal=CFG.workDays*CFG.normHours;
 
 const ROLES={
 hr:{pin:'1111',label:'HR-менеджер',tabs:['dash','recruit','staff','siz','hostel','rejects'],write:['recruit','siz','hostel','rejects']},
 brigadir:{pin:'2222',label:'Бригадир',tabs:['dash','staff','hostel','schedule'],write:['schedule']},
 manager:{pin:'3333',label:'Менеджер проекта',tabs:['dash','recruit','staff','siz','hostel','schedule','rejects'],write:['recruit','staff','siz','hostel','schedule','rejects']},
-chief:{pin:'4444',label:'Руководитель',tabs:['dash','recruit','staff','siz','hostel','schedule','rejects'],write:['recruit','rejects']},
+chief:{pin:'4444',label:'Руководитель',tabs:['dash','recruit','staff','siz','hostel','schedule','rejects'],write:['recruit','rejects','schedule']},
 finance:{pin:'5555',label:'Бухгалтерия',tabs:['dash','schedule'],write:[]},
 admin:{pin:'0000',label:'Админ',tabs:['dash','recruit','staff','siz','hostel','schedule','rejects'],write:['dash','recruit','staff','siz','hostel','schedule','rejects']}
 };
@@ -157,16 +165,16 @@ document.getElementById('logoutBtn').addEventListener('click',logout);
 
 let DB={candidates:[
 {id:'c1',fio:'Иванов Пётр Сергеевич',pos:'kompl',age:35,status:'check',date:'2026-05-20',phone:'+7-999-111-22-33'},
-{id:'c2',fio:'Смирнова Анна Викторовна',pos:'moy',age:28,status:'med',date:'2026-05-19',phone:'+7-999-222-33-44'},
-{id:'c3',fio:'Козлов Дмитрий Алексеевич',pos:'gruz',age:42,status:'ready',date:'2026-05-18',phone:'+7-999-333-44-55'},
+{id:'c2',fio:'Смирнова Анна Викторовна',pos:'moy',age:28,status:'docs_ok',date:'2026-05-19',phone:'+7-999-222-33-44'},
+{id:'c3',fio:'Козлов Дмитрий Алексеевич',pos:'gruz',age:42,status:'video',date:'2026-05-18',phone:'+7-999-333-44-55'},
 {id:'c4',fio:'Морозова Елена Игоревна',pos:'ubor',age:31,status:'new',date:'2026-05-21',phone:''},
 {id:'c5',fio:'Тимофеев Руслан Олегович',pos:'kompl',age:26,status:'new',date:'2026-05-22',phone:''}],
 employees:[
-{id:'e1',fio:'Абрамов Виктор Иванович',pos:'kompl',shift:'А',status:'on',hired:'2024-03-15',hostelRate:300},
-{id:'e2',fio:'Белова Наталья Сергеевна',pos:'moy',shift:'Б',status:'off',hired:'2023-09-01',hostelRate:300},
-{id:'e3',fio:'Волков Андрей Петрович',pos:'gruz',shift:'А',status:'on',hired:'2022-06-10',hostelRate:300},
-{id:'e4',fio:'Григорьева Екатерина Дмитриевна',pos:'ubor',shift:'Б',status:'sick',hired:'2025-01-20',hostelRate:300},
-{id:'e5',fio:'Давыдов Кирилл Романович',pos:'kompl',shift:'А',status:'on',hired:'2024-11-05',hostelRate:300}],
+{id:'e1',fio:'Абрамов Виктор Иванович',pos:'kompl',shift:'А',status:'on',hired:'2024-03-15',vahtaStart:'2026-06-01',bank:'Сбербанк',bik:'044525225',rs:'40817810000001234567',card:'2200 1234 5678 9012',cardPhone:'+7-999-111-22-33',hours:[11,11,11,11,11,11,0,11,11,11,11,11,11,0],bonus:0,penalty:0},
+{id:'e2',fio:'Белова Наталья Сергеевна',pos:'moy',shift:'Б',status:'on',hired:'2023-09-01',vahtaStart:'2026-06-02',bank:'Тинькофф',bik:'044525974',rs:'40817810100002345678',card:'5536 9876 5432 1098',cardPhone:'+7-999-222-33-44',hours:[0,11,11,11,11,11,11,0,11,11,11,10,11,11],bonus:2000,penalty:0},
+{id:'e3',fio:'Волков Андрей Петрович',pos:'gruz',shift:'А',status:'on',hired:'2022-06-10',vahtaStart:'2026-06-03',bank:'Альфа',bik:'044525593',rs:'40817810200003456789',card:'',cardPhone:'+7-999-333-44-55',hours:[0,0,12,12,12,11,11,12,0,12,12,12,11,11],bonus:0,penalty:1500},
+{id:'e4',fio:'Григорьева Екатерина Дм.',pos:'ubor',shift:'Б',status:'sick',hired:'2025-01-20',vahtaStart:'2026-06-04',bank:'Сбербанк',bik:'044525225',rs:'',card:'2200 5678 1234 5678',cardPhone:'+7-999-444-55-66',hours:[0,0,0,10,10,10,10,10,10,0,10,10,10,10],bonus:0,penalty:0},
+{id:'e5',fio:'Давыдов Кирилл Романович',pos:'kompl',shift:'А',status:'on',hired:'2024-11-05',vahtaStart:'2026-06-01',bank:'ВТБ',bik:'044525187',rs:'40817810300004567890',card:'',cardPhone:'+7-999-555-66-77',hours:[11,11,11,11,11,11,0,11,11,11,11,11,11,0],bonus:5000,penalty:0}],
 rejects:[
 {id:'rj1',fio:'Петухов Сергей Николаевич',pos:'kompl',reason:'Не прошёл СБ',stage:'check',date:'2026-05-10',canRecall:false},
 {id:'rj2',fio:'Сидорова Марина Павловна',pos:'moy',reason:'Не прошла медосмотр',stage:'med',date:'2026-05-12',canRecall:true}],
@@ -175,8 +183,7 @@ siz:[
 {id:'s2',eid:'e2',item:'Перчатки х/б',exp:'2026-05-18',st:'expired'},
 {id:'s3',eid:'e3',item:'Ботинки защитные',exp:'2026-05-20',st:'expired'},
 {id:'s4',eid:'e4',item:'Халат рабочий',exp:'2026-06-01',st:'soon'},
-{id:'s5',eid:'e5',item:'Каска защитная',exp:'2026-06-08',st:'soon'},
-{id:'s6',eid:'e1',item:'Фартук',exp:'2027-01-10',st:'ok'}],
+{id:'s5',eid:'e5',item:'Каска защитная',exp:'2026-06-08',st:'soon'}],
 rooms:[
 {id:'r1',name:'К.101',bld:'Корпус 1',rate:300,beds:[{n:'АВ',e:'e1'},{n:null,e:null},{n:'ВА',e:'e3'},{n:null,e:null}]},
 {id:'r2',name:'К.102',bld:'Корпус 1',rate:300,beds:[{n:'БН',e:'e2'},{n:'ДК',e:'e5'},{n:'ГЕ',e:'e4'},{n:null,e:null}]},
@@ -188,18 +195,33 @@ function $$(s){return document.querySelectorAll(s)}
 function ini(f){return f.split(' ').map(w=>w[0]).slice(0,2).join('')}
 function uid(){return 'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)}
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2000);}
-function fd(d){if(!d)return'—';const p=d.split('-');return p[2]+'.'+p[1];}
+function fd(d){if(!d)return'—';const p=d.split('-');return p.length===3?p[2]+'.'+p[1]:d;}
 function en(id){const e=DB.employees.find(x=>x.id===id);return e?e.fio:'—';}
 function pn(pid){const p=POSITIONS.find(x=>x.id===pid);return p?p.name:pid;}
 function pr(pid){const p=POSITIONS.find(x=>x.id===pid);return p?p.rate:0;}
-function pd(pid){const p=POSITIONS.find(x=>x.id===pid);return p?p.dept:'—';}
 function canWrite(tab){return curRole?ROLES[curRole].write.includes(tab):false;}
 function canSee(tab){return curRole?ROLES[curRole].tabs.includes(tab):false;}
 function posOpts(sel){return POSITIONS.map(p=>'<option value="'+p.id+'"'+(sel===p.id?' selected':'')+'>'+p.name+(p.rate?' ('+p.rate+' ₽/ч)':'')+'</option>').join('');}
-function deptOpts(sel){return DEPTS.map(d=>'<option'+(sel===d?' selected':'')+'>'+d+'</option>').join('')+'<option>Другое…</option>';}
 function rejectOpts(){return REJECT_REASONS.map(r=>'<option>'+r+'</option>').join('');}
 
-const CS={new:{l:'Отклик',c:'bgray'},check:{l:'Проверка СБ',c:'bb'},interview_brig:{l:'Собес. бригадир',c:'bo'},med:{l:'Медосмотр',c:'bo'},docs:{l:'Оформление',c:'bg'},ready:{l:'Готов',c:'bg'},hired:{l:'Вышел',c:'bg'},reject:{l:'Отказ',c:'br'}};
+// Расчёт зарплаты
+function calcPay(e){
+  const hrs=e.hours?e.hours.reduce((a,b)=>a+b,0):0;
+  const smen=e.hours?e.hours.filter(h=>h>0).length:0;
+  const oklNachisl=CFG.nachislVahta*(hrs/CFG.normHoursTotal);
+  const vznosy=oklNachisl*CFG.vznosy;
+  const ndfl=oklNachisl*CFG.ndfl;
+  const oklNaRuki=oklNachisl-ndfl;
+  const comp=CFG.compSmena*(hrs/CFG.normHours);
+  const rate=pr(e.pos);
+  const podr=rate*hrs-oklNaRuki-comp;
+  const bonus=e.bonus||0;
+  const penalty=e.penalty||0;
+  const total=oklNaRuki+comp+Math.max(0,podr)+bonus-penalty;
+  return{hrs,smen,oklNachisl,vznosy,ndfl,oklNaRuki,comp,podr:Math.max(0,podr),bonus,penalty,total,rashod:oklNachisl+vznosy};
+}
+
+const CS={new:{l:'Отклик',c:'bgray'},check:{l:'Проверка СБ',c:'bb'},docs_ok:{l:'Доки ОК',c:'bg'},video:{l:'Видео-собес',c:'bo'},interview_brig:{l:'Собес. бригадир',c:'bo'},interview_aero:{l:'Собес. Аэромар',c:'bb'},med:{l:'Медосмотр',c:'bo'},docs:{l:'Оформление',c:'bg'},ready:{l:'Готов',c:'bg'},hired:{l:'Вышел',c:'bg'},reject:{l:'Отказ',c:'br'}};
 const ES={on:{l:'На смене',c:'bg'},off:{l:'Выходной',c:'bgray'},sick:{l:'Больничный',c:'bo'},vacation:{l:'Отпуск',c:'bb'}};
 
 function buildTabs(){$('#tabsBar').innerHTML=ROLES[curRole].tabs.map(t=>'<button class="tab" data-p="'+t+'">'+TL[t]+'</button>').join('');$('#tabsBar').querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>sp(t.dataset.p)));}
@@ -213,87 +235,142 @@ const cn=DB.candidates.filter(c=>c.status!=='hired'&&c.status!=='reject').length
 const se=DB.siz.filter(s=>s.st==='expired').length;
 const fb=DB.rooms.reduce((a,r)=>a+r.beds.filter(b=>!b.e).length,0);
 const te=DB.employees.length;
-const al=[];
-if(se)al.push({t:'red',i:'🔴',x:'СИЗ просрочен у <b>'+se+'</b> сотрудников'});
-const nc=DB.candidates.filter(c=>c.status==='new').length;
-if(nc)al.push({t:'orange',i:'🟠',x:'<b>'+nc+'</b> новых откликов ждут обработки'});
+const al=[];if(se)al.push({t:'red',i:'🔴',x:'СИЗ просрочен у <b>'+se+'</b> сотрудников'});
+const nc=DB.candidates.filter(c=>c.status==='new').length;if(nc)al.push({t:'orange',i:'🟠',x:'<b>'+nc+'</b> новых откликов'});
 
-let mg='<div class="mgrid"><div class="metric"'+(canSee('staff')?' data-go="staff"':'')+'><div class="micon">👥</div><span class="mval">'+te+'</span><div class="mlabel">В штате</div></div>';
+let mg='<div class="mgrid"><div class="metric" data-go="staff"><div class="micon">👥</div><span class="mval">'+te+'</span><div class="mlabel">В штате</div></div>';
 if(canSee('recruit'))mg+='<div class="metric" data-go="recruit"><div class="micon">🔍</div><span class="mval gold">'+cn+'</span><div class="mlabel">Кандидаты</div></div>';
-if(canSee('siz'))mg+='<div class="metric" data-go="siz"><div class="micon">🦺</div><span class="mval '+(se?'red':'')+'">'+se+'</span><div class="mlabel">СИЗ просроч.</div></div>';
+if(canSee('siz'))mg+='<div class="metric" data-go="siz"><div class="micon">🦺</div><span class="mval '+(se?'red':'')+'">'+se+'</span><div class="mlabel">СИЗ</div></div>';
 if(canSee('hostel'))mg+='<div class="metric" data-go="hostel"><div class="micon">🏠</div><span class="mval">'+fb+'</span><div class="mlabel">Койки</div></div>';
 mg+='</div>';
 
-// Заявка по должностям
-let posHtml='<div class="card"><div class="ctitle">📋 Заявка Аэромар · 50 вакансий</div>';
-POSITIONS.filter(p=>p.count>0).forEach(p=>{
-const filled=DB.employees.filter(e=>e.pos===p.id).length;
-posHtml+='<div class="sitem"><div><div class="sname">'+p.name+'</div><div class="sname-sub">'+p.rate+' ₽/ч · '+p.dept+'</div></div><span class="badge '+(filled>=p.count?'bg':'bo')+'">'+filled+'/'+p.count+'</span></div>';
-});
+let posHtml='<div class="card"><div class="ctitle">📋 Заявка · 50 вакансий</div>';
+POSITIONS.filter(p=>p.count>0).forEach(p=>{const filled=DB.employees.filter(e=>e.pos===p.id).length;posHtml+='<div class="sitem"><div><div class="sname">'+p.name+'</div><div class="sname-sub">'+p.rate+' ₽/ч</div></div><span class="badge '+(filled>=p.count?'bg':'bo')+'">'+filled+'/'+p.count+'</span></div>';});
 posHtml+='</div>';
 
 let fin='';if(curRole==='finance'||curRole==='admin'||curRole==='chief'){
-const hostelCost=DB.employees.length*HOSTEL_RATE*VAHTA_DAYS;
-fin='<div class="card"><div class="ctitle">💰 Финансы (демо)</div><div class="sitem"><span class="sname">Общежитие/мес</span><span class="badge bo">'+Math.round(hostelCost/1000)+'К ₽</span></div><div class="sitem"><span class="sname">Ставка общежития</span><span class="badge bg">'+HOSTEL_RATE+' ₽/сут</span></div></div>';}
+let totPay=0,totRashod=0;DB.employees.forEach(e=>{const c=calcPay(e);totPay+=c.total;totRashod+=c.rashod;});
+fin='<div class="card"><div class="ctitle">💰 Расчёт за период</div><div class="sitem"><span class="sname">На руки всем</span><span class="badge bg">'+Math.round(totPay/1000)+'К ₽</span></div><div class="sitem"><span class="sname">Расход работодателя</span><span class="badge br">'+Math.round(totRashod/1000)+'К ₽</span></div><div class="sitem"><span class="sname">Общежитие/мес</span><span class="badge bo">'+Math.round(DB.employees.length*CFG.hostelRate*CFG.vahtaDays/1000)+'К ₽</span></div></div>';}
 
-let act='';if(canWrite('recruit')||canWrite('siz')){act='<div class="actions">';if(canWrite('recruit'))act+='<div class="action-btn" data-a="addC"><div class="action-icon">📋</div><div class="action-label">Новый кандидат</div></div>';if(canWrite('siz'))act+='<div class="action-btn" data-a="addS"><div class="action-icon">🦺</div><div class="action-label">Выдать СИЗ</div></div>';act+='</div>';}
-
-return mg+posHtml+act+(al.length?'<div class="card"><div class="ctitle">⚡ Срочное</div>'+al.map(a=>'<div class="alert alert-'+a.t+'"><span>'+a.i+'</span><div>'+a.x+'</div></div>').join('')+'</div>':'')+fin;
+return mg+posHtml+(al.length?'<div class="card"><div class="ctitle">⚡ Срочное</div>'+al.map(a=>'<div class="alert alert-'+a.t+'"><span>'+a.i+'</span><div>'+a.x+'</div></div>').join('')+'</div>':'')+fin;
 },
 
 recruit(){
-const bs={};DB.candidates.forEach(c=>{bs[c.status]=(bs[c.status]||0)+1;});const tot=DB.candidates.length||1;
-const st=[{k:'new',l:'Отклик',bg:'var(--blue-bg)',br:'var(--blue)'},{k:'check',l:'Проверка СБ',bg:'var(--orange-bg)',br:'var(--orange)'},{k:'interview_brig',l:'Собес. бригадир',bg:'#1a1510',br:'var(--gold)'},{k:'med',l:'Медосмотр',bg:'#1a1a05',br:'var(--gold)'},{k:'docs',l:'Оформление',bg:'var(--green-bg)',br:'var(--green)'},{k:'ready',l:'Готов',bg:'var(--accent)',br:'var(--accent)'}];
+const bs={};DB.candidates.forEach(c=>{bs[c.status]=(bs[c.status]||0)+1;});
+const st=[{k:'new',l:'Отклик',bg:'var(--blue-bg)',br:'var(--blue)'},{k:'check',l:'Проверка СБ',bg:'var(--orange-bg)',br:'var(--orange)'},{k:'docs_ok',l:'Доки ОК',bg:'var(--green-bg)',br:'var(--green)'},{k:'video',l:'Видео-собес',bg:'#1a1510',br:'var(--gold)'},{k:'interview_brig',l:'Собес. бригадир',bg:'#1a1510',br:'var(--gold)'},{k:'interview_aero',l:'Собес. Аэромар',bg:'var(--blue-bg)',br:'var(--blue)'},{k:'med',l:'Медосмотр',bg:'#1a1a05',br:'var(--gold)'},{k:'docs',l:'Оформление',bg:'var(--green-bg)',br:'var(--green)'},{k:'ready',l:'Готов',bg:'var(--accent)',br:'var(--accent)'}];
 const mx=Math.max(...st.map(s=>bs[s.k]||0),1);
-let fc=DB.candidates;if(curRole==='brigadir'){const bs2=['interview_brig','med','docs','ready','hired','reject'];fc=DB.candidates.filter(c=>bs2.includes(c.status));}
-return roBanner('recruit')+'<div class="card"><div class="ctitle">📈 Воронка</div><div class="funnel">'+st.map(s=>{const n=bs[s.k]||0;return'<div class="funnel-row"><span class="funnel-count">'+n+'</span><div class="funnel-bar" style="width:'+Math.max(30,n/mx*100)+'%;background:'+s.bg+';border:1px solid '+s.br+'">'+s.l+'</div></div>';}).join('')+'</div></div>'+(canWrite('recruit')?'<div class="action-btn" data-a="addC" style="margin-bottom:10px;text-align:center"><div class="action-icon">➕</div><div class="action-label">Добавить кандидата</div></div>':'')+'<div class="card"><div class="ctitle">👤 Все ('+fc.length+')</div>'+fc.map(c=>'<div class="cand" data-a="viewC" data-id="'+c.id+'"><div class="cand-ava">'+ini(c.fio)+'</div><div class="cand-info"><div class="cand-name">'+c.fio+'</div><div class="cand-meta">'+pn(c.pos)+' · '+pr(c.pos)+' ₽/ч · с '+fd(c.date)+'</div></div><span class="badge '+(CS[c.status]||{c:'bgray'}).c+'">'+(CS[c.status]||{l:c.status}).l+'</span></div>').join('')+'</div>';
+let fc=DB.candidates;if(curRole==='brigadir'){const bs2=['interview_brig','interview_aero','med','docs','ready','hired','reject'];fc=DB.candidates.filter(c=>bs2.includes(c.status));}
+return roBanner('recruit')+'<div class="card"><div class="ctitle">📈 Воронка</div><div class="funnel">'+st.map(s=>{const n=bs[s.k]||0;return'<div class="funnel-row"><span class="funnel-count">'+n+'</span><div class="funnel-bar" style="width:'+Math.max(30,n/mx*100)+'%;background:'+s.bg+';border:1px solid '+s.br+'">'+s.l+'</div></div>';}).join('')+'</div></div>'+(canWrite('recruit')?'<div class="action-btn" data-a="addC" style="margin-bottom:10px;text-align:center"><div class="action-icon">➕</div><div class="action-label">Добавить кандидата</div></div>':'')+'<div class="card"><div class="ctitle">👤 Все ('+fc.length+')</div>'+fc.map(c=>'<div class="cand" data-a="viewC" data-id="'+c.id+'"><div class="cand-ava">'+ini(c.fio)+'</div><div class="cand-info"><div class="cand-name">'+c.fio+'</div><div class="cand-meta">'+pn(c.pos)+' · '+pr(c.pos)+' ₽/ч</div></div><span class="badge '+(CS[c.status]||{c:'bgray'}).c+'">'+(CS[c.status]||{l:c.status}).l+'</span></div>').join('')+'</div>';
 },
 
 staff(){
-return roBanner('staff')+'<div class="card"><div class="ctitle">📊 По должностям</div>'+POSITIONS.filter(p=>p.count>0).map(p=>{const n=DB.employees.filter(e=>e.pos===p.id).length;return'<div class="sitem"><div><div class="sname">'+p.name+'</div><div class="sname-sub">'+p.rate+' ₽/ч · '+p.dept+'</div></div><span class="badge '+(n>=p.count?'bg':'bo')+'">'+n+'/'+p.count+'</span></div>';}).join('')+'</div><div class="card"><div class="ctitle">🔍 Сотрудники ('+DB.employees.length+')</div>'+DB.employees.map(e=>'<div class="sitem"><div><div class="sname">'+e.fio+'</div><div class="sname-sub">'+pn(e.pos)+' · '+pr(e.pos)+' ₽/ч · Смена '+e.shift+'</div></div><span class="badge '+(ES[e.status]||{c:'bgray'}).c+'">'+(ES[e.status]||{l:e.status}).l+'</span></div>').join('')+'</div>';
+return roBanner('staff')+'<div class="card"><div class="ctitle">📊 По должностям</div>'+POSITIONS.filter(p=>p.count>0).map(p=>{const n=DB.employees.filter(e=>e.pos===p.id).length;return'<div class="sitem"><div><div class="sname">'+p.name+'</div><div class="sname-sub">'+p.rate+' ₽/ч</div></div><span class="badge '+(n>=p.count?'bg':'bo')+'">'+n+'/'+p.count+'</span></div>';}).join('')+'</div><div class="card"><div class="ctitle">🔍 Сотрудники</div>'+DB.employees.map(e=>'<div class="cand" data-a="viewE" data-id="'+e.id+'"><div class="cand-ava">'+ini(e.fio)+'</div><div class="cand-info"><div class="cand-name">'+e.fio+'</div><div class="cand-meta">'+pn(e.pos)+' · с '+fd(e.vahtaStart)+'</div></div><span class="badge '+(ES[e.status]||{c:'bgray'}).c+'">'+(ES[e.status]||{l:e.status}).l+'</span></div>').join('')+'</div>';
+},
+
+schedule(){
+let h='<div class="card"><div class="ctitle">📊 Табель · 14 дней</div><div class="tbl-scroll"><table class="tbl"><tr><th>ФИО</th>';
+for(let d=1;d<=14;d++)h+='<th>'+d+'</th>';
+h+='<th>Ч</th><th>См</th><th>Оклад</th><th>НДФЛ</th><th>На руки</th><th>Комп</th><th>Подр</th><th>Прем</th><th>Штраф</th><th>ИТОГО</th></tr>';
+let totals={hrs:0,oklNachisl:0,ndfl:0,oklNaRuki:0,comp:0,podr:0,bonus:0,penalty:0,total:0};
+DB.employees.forEach(e=>{
+const c=calcPay(e);
+h+='<tr><td class="td-name">'+e.fio.split(' ').slice(0,2).join(' ')+'</td>';
+for(let d=0;d<14;d++){
+const v=(e.hours&&e.hours[d])||0;
+h+='<td class="'+(v===0?'day-off':'')+'">'+(canWrite('schedule')?'<input type="number" min="0" max="16" value="'+v+'" data-eid="'+e.id+'" data-d="'+d+'">':v)+'</td>';
+}
+h+='<td class="sum-col">'+c.hrs+'</td><td class="sum-col">'+c.smen+'</td>';
+h+='<td class="money">'+Math.round(c.oklNachisl).toLocaleString()+'</td>';
+h+='<td class="money">'+Math.round(c.ndfl).toLocaleString()+'</td>';
+h+='<td class="money">'+Math.round(c.oklNaRuki).toLocaleString()+'</td>';
+h+='<td class="money">'+Math.round(c.comp).toLocaleString()+'</td>';
+h+='<td class="money">'+Math.round(c.podr).toLocaleString()+'</td>';
+h+='<td class="money">'+(canWrite('schedule')?'<input type="number" min="0" value="'+(e.bonus||0)+'" data-eid="'+e.id+'" data-f="bonus" style="width:44px">':c.bonus)+'</td>';
+h+='<td class="money">'+(canWrite('schedule')?'<input type="number" min="0" value="'+(e.penalty||0)+'" data-eid="'+e.id+'" data-f="penalty" style="width:44px">':c.penalty)+'</td>';
+h+='<td class="sum-col" style="color:var(--gold);font-size:.7rem">'+Math.round(c.total).toLocaleString()+'</td></tr>';
+Object.keys(totals).forEach(k=>{totals[k]+=c[k]||0;});
+});
+h+='<tr style="background:var(--bg3)"><td class="td-name" style="color:var(--accent)">ИТОГО</td>';
+for(let d=0;d<14;d++)h+='<td></td>';
+h+='<td class="sum-col">'+totals.hrs+'</td><td></td>';
+h+='<td class="money">'+Math.round(totals.oklNachisl).toLocaleString()+'</td>';
+h+='<td class="money">'+Math.round(totals.ndfl).toLocaleString()+'</td>';
+h+='<td class="money">'+Math.round(totals.oklNaRuki).toLocaleString()+'</td>';
+h+='<td class="money">'+Math.round(totals.comp).toLocaleString()+'</td>';
+h+='<td class="money">'+Math.round(totals.podr).toLocaleString()+'</td>';
+h+='<td class="money">'+Math.round(totals.bonus).toLocaleString()+'</td>';
+h+='<td class="money">'+Math.round(totals.penalty).toLocaleString()+'</td>';
+h+='<td class="sum-col" style="color:var(--gold);font-size:.75rem">'+Math.round(totals.total).toLocaleString()+'</td></tr>';
+h+='</table></div></div>';
+h+=roBanner('schedule');
+if(canWrite('schedule'))h+='<div class="action-btn" data-a="exportXlsx" style="margin-bottom:10px;text-align:center"><div class="action-icon">📥</div><div class="action-label">Выгрузить XLSX</div></div>';
+return h;
 },
 
 siz(){const ex=DB.siz.filter(s=>s.st==='expired'),so=DB.siz.filter(s=>s.st==='soon'),ok=DB.siz.filter(s=>s.st==='ok');
-return roBanner('siz')+'<div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">'+DB.siz.length+'</span><div class="mlabel">Выдано</div></div><div class="metric"><span class="mval red">'+ex.length+'</span><div class="mlabel">Просрочено</div></div><div class="metric"><span class="mval orange">'+so.length+'</span><div class="mlabel">Замена 30д</div></div></div>'+(canWrite('siz')?'<div class="action-btn" data-a="addS" style="margin-bottom:10px;text-align:center"><div class="action-icon">➕</div><div class="action-label">Выдать СИЗ</div></div>':'')+(ex.length?'<div class="card"><div class="ctitle">🔴 Просроченные</div>'+ex.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge br">истёк '+fd(s.exp)+'</span></div>').join('')+'</div>':'')+(so.length?'<div class="card"><div class="ctitle">🟠 Скоро</div>'+so.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge bo">'+fd(s.exp)+'</span></div>').join('')+'</div>':'')+(ok.length?'<div class="card"><div class="ctitle">✅ Норма</div>'+ok.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge bg">до '+fd(s.exp)+'</span></div>').join('')+'</div>':'');
+return roBanner('siz')+'<div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">'+DB.siz.length+'</span><div class="mlabel">Выдано</div></div><div class="metric"><span class="mval red">'+ex.length+'</span><div class="mlabel">Просрочено</div></div><div class="metric"><span class="mval orange">'+so.length+'</span><div class="mlabel">Замена 30д</div></div></div>'+(canWrite('siz')?'<div class="action-btn" data-a="addS" style="margin-bottom:10px;text-align:center"><div class="action-icon">➕</div><div class="action-label">Выдать СИЗ</div></div>':'')+(ex.length?'<div class="card"><div class="ctitle">🔴 Просроченные</div>'+ex.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge br">истёк '+fd(s.exp)+'</span></div>').join('')+'</div>':'')+(so.length?'<div class="card"><div class="ctitle">🟠 Скоро</div>'+so.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge bo">'+fd(s.exp)+'</span></div>').join('')+'</div>':'');
 },
 
 hostel(){const blds={};DB.rooms.forEach(r=>{if(!blds[r.bld])blds[r.bld]=[];blds[r.bld].push(r);});const fb=DB.rooms.reduce((a,r)=>a+r.beds.filter(b=>!b.e).length,0),tb=DB.rooms.reduce((a,r)=>a+r.beds.length,0);
-return roBanner('hostel')+'<div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">'+tb+'</span><div class="mlabel">Всего</div></div><div class="metric"><span class="mval">'+(tb-fb)+'</span><div class="mlabel">Заселено</div></div><div class="metric"><span class="mval" style="color:var(--green)">'+fb+'</span><div class="mlabel">Свободно</div></div></div><div class="card"><div class="ctitle">💰 Стоимость: '+HOSTEL_RATE+' ₽/сут на человека</div></div>'+Object.entries(blds).map(([b,rs])=>'<div class="card"><div class="ctitle">🏠 '+b+'</div>'+rs.map(r=>{const tk=r.beds.filter(b=>b.e).length;return'<div class="room"><div class="room-header"><span class="room-name">'+r.name+' <span style="color:var(--text2);font-weight:400">'+r.rate+' ₽/сут</span></span><span class="badge '+(tk===r.beds.length?'bg':'bo')+'">'+tk+'/'+r.beds.length+'</span></div><div class="room-beds">'+r.beds.map((bed,i)=>bed.e?'<div class="bed bed-taken">'+(bed.n||'??')+'</div>':(canWrite('hostel')?'<div class="bed bed-free" data-a="assignB" data-r="'+r.id+'" data-b="'+i+'">—</div>':'<div class="bed bed-free">—</div>')).join('')+'</div></div>';}).join('')+'</div>').join('')+'<div class="card"><div class="ctitle">🚐 Трансфер</div>'+DB.transfers.map(t=>'<div class="sitem"><span class="sname">'+t.r+'<span class="sname-sub" style="display:block">'+t.d+'</span></span><span class="badge bg">'+t.t+'</span></div>').join('')+'</div>';
+return roBanner('hostel')+'<div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">'+tb+'</span><div class="mlabel">Всего</div></div><div class="metric"><span class="mval">'+(tb-fb)+'</span><div class="mlabel">Заселено</div></div><div class="metric"><span class="mval" style="color:var(--green)">'+fb+'</span><div class="mlabel">Свободно</div></div></div><div class="card"><div class="ctitle">💰 '+CFG.hostelRate+' ₽/сут</div></div>'+Object.entries(blds).map(([b,rs])=>'<div class="card"><div class="ctitle">🏠 '+b+'</div>'+rs.map(r=>{const tk=r.beds.filter(b=>b.e).length;return'<div class="room"><div class="room-header"><span class="room-name">'+r.name+'</span><span class="badge '+(tk===r.beds.length?'bg':'bo')+'">'+tk+'/'+r.beds.length+'</span></div><div class="room-beds">'+r.beds.map((bed,i)=>bed.e?'<div class="bed bed-taken">'+(bed.n||'??')+'</div>':(canWrite('hostel')?'<div class="bed bed-free" data-a="assignB" data-r="'+r.id+'" data-b="'+i+'">—</div>':'<div class="bed bed-free">—</div>')).join('')+'</div></div>';}).join('')+'</div>').join('')+'<div class="card"><div class="ctitle">🚐 Трансфер</div>'+DB.transfers.map(t=>'<div class="sitem"><span class="sname">'+t.r+'<span class="sname-sub" style="display:block">'+t.d+'</span></span><span class="badge bg">'+t.t+'</span></div>').join('')+'</div>';
 },
 
-schedule(){const on=DB.employees.filter(e=>e.status==='on'),sk=DB.employees.filter(e=>e.status==='sick'),vc=DB.employees.filter(e=>e.status==='vacation'),of=DB.employees.filter(e=>e.status==='off');
-return roBanner('schedule')+'<div class="card"><div class="ctitle">📅 Сегодня</div><div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">'+on.length+'</span><div class="mlabel">На смене</div></div><div class="metric"><span class="mval gold">'+vc.length+'</span><div class="mlabel">Отпуск</div></div><div class="metric"><span class="mval orange">'+sk.length+'</span><div class="mlabel">Больничный</div></div></div></div><div class="card"><div class="ctitle">📊 Смены</div><div class="sitem"><span class="sname">Смена А<span class="sname-sub" style="display:block">06:00–18:00</span></span><span class="badge bg">'+DB.employees.filter(e=>e.shift==='А'&&e.status==='on').length+'</span></div><div class="sitem"><span class="sname">Смена Б<span class="sname-sub" style="display:block">18:00–06:00</span></span><span class="badge bb">'+DB.employees.filter(e=>e.shift==='Б'&&e.status==='on').length+'</span></div></div>'+(canWrite('schedule')?'<div class="action-btn" style="margin-bottom:10px;text-align:center" data-a="exportTab"><div class="action-icon">📤</div><div class="action-label">Выгрузить табель</div></div>':'');
-},
-
-rejects(){return roBanner('rejects')+'<div class="mgrid" style="grid-template-columns:repeat(2,1fr)"><div class="metric"><span class="mval red">'+DB.rejects.length+'</span><div class="mlabel">В базе отказов</div></div><div class="metric"><span class="mval gold">'+DB.rejects.filter(r=>r.canRecall).length+'</span><div class="mlabel">Можно вернуть</div></div></div><div class="card"><div class="ctitle">🚫 Не прошли / Уволены</div>'+(DB.rejects.length?DB.rejects.map(r=>'<div class="cand" data-a="viewR" data-id="'+r.id+'"><div class="cand-ava" style="background:var(--red-bg);color:var(--red)">'+ini(r.fio)+'</div><div class="cand-info"><div class="cand-name">'+r.fio+'</div><div class="cand-meta">'+pn(r.pos)+' · '+r.reason+'</div></div><span class="badge '+(r.canRecall?'bo':'br')+'">'+(r.canRecall?'можно вернуть':'закрыт')+'</span></div>').join(''):'<div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);padding:10px;text-align:center">База пуста</div>')+'</div>';}
+rejects(){return roBanner('rejects')+'<div class="mgrid" style="grid-template-columns:repeat(2,1fr)"><div class="metric"><span class="mval red">'+DB.rejects.length+'</span><div class="mlabel">В базе</div></div><div class="metric"><span class="mval gold">'+DB.rejects.filter(r=>r.canRecall).length+'</span><div class="mlabel">Можно вернуть</div></div></div><div class="card"><div class="ctitle">🚫 Отказы</div>'+(DB.rejects.length?DB.rejects.map(r=>'<div class="cand" data-a="viewR" data-id="'+r.id+'"><div class="cand-ava" style="background:var(--red-bg);color:var(--red)">'+ini(r.fio)+'</div><div class="cand-info"><div class="cand-name">'+r.fio+'</div><div class="cand-meta">'+pn(r.pos)+' · '+r.reason+'</div></div><span class="badge '+(r.canRecall?'bo':'br')+'">'+(r.canRecall?'вернуть':'закрыт')+'</span></div>').join(''):'<div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);padding:10px;text-align:center">Пусто</div>')+'</div>';}
 };
 
+// MODALS
 function om(h){$('#mb').innerHTML=h;$('#mo').classList.add('open');}
 function cm(){$('#mo').classList.remove('open');}
 
-function mAddC(){om('<div class="modal-title">➕ Новый кандидат</div><div class="form-group"><label class="form-label">ФИО</label><input class="form-input" id="ff" placeholder="Фамилия Имя Отчество"></div><div class="form-group"><label class="form-label">Должность</label><select class="form-select" id="fp">'+posOpts('')+'</select><input class="form-input other-input" id="fpOther" placeholder="Введите должность"></div><div class="form-row"><div class="form-group"><label class="form-label">Возраст</label><input class="form-input" id="fa" type="number" placeholder="30"></div><div class="form-group"><label class="form-label">Телефон</label><input class="form-input" id="fph" placeholder="+7-999-..."></div></div><button class="form-btn" id="bsc">ДОБАВИТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');
-$('#fp').onchange=function(){$('#fpOther').classList.toggle('show',this.value==='other');};}
+function mAddC(){om('<div class="modal-title">➕ Кандидат</div><div class="form-group"><label class="form-label">ФИО</label><input class="form-input" id="ff" placeholder="Фамилия Имя Отчество"></div><div class="form-group"><label class="form-label">Должность</label><select class="form-select" id="fp">'+posOpts('')+'</select></div><div class="form-row"><div class="form-group"><label class="form-label">Возраст</label><input class="form-input" id="fa" type="number" placeholder="30"></div><div class="form-group"><label class="form-label">Телефон</label><input class="form-input" id="fph" placeholder="+7-999-..."></div></div><button class="form-btn" id="bsc">ДОБАВИТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
 
 function mViewC(id){const c=DB.candidates.find(x=>x.id===id);if(!c)return;const sts=Object.entries(CS).map(([k,v])=>'<option value="'+k+'"'+(c.status===k?' selected':'')+'>'+v.l+'</option>').join('');const w=canWrite('recruit');
-om('<div class="modal-title">👤 '+c.fio+'</div><div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);margin-bottom:12px">'+pn(c.pos)+' · '+pr(c.pos)+' ₽/ч · '+(c.age||'—')+' лет'+(c.phone?' · '+c.phone:'')+'<br>За вахту: ~'+(pr(c.pos)*SHIFT_HOURS*Math.round(VAHTA_DAYS*6/7)/1000).toFixed(0)+'К ₽</div>'+(w?'<div class="form-group"><label class="form-label">Статус</label><select class="form-select" id="fs">'+sts+'</select></div><button class="form-btn" id="buc" data-id="'+c.id+'">ОБНОВИТЬ СТАТУС</button><button class="form-btn" style="background:var(--accent)" id="bhc" data-id="'+c.id+'">✅ ПРИНЯТЬ В ШТАТ</button><div class="form-group"><label class="form-label">Причина отказа</label><select class="form-select" id="frr">'+rejectOpts()+'</select><input class="form-input other-input" id="frrOther" placeholder="Укажите причину"></div><button class="form-btn form-btn-danger" id="brc" data-id="'+c.id+'">ОТКАЗАТЬ → В БАЗУ</button>':'<div class="readonly-banner">🔒 Только просмотр</div>')+'<button class="form-btn form-btn-gray" id="bx">ЗАКРЫТЬ</button>');
-if(w&&$('#frr'))$('#frr').onchange=function(){$('#frrOther').classList.toggle('show',this.value==='Другое…');};}
+om('<div class="modal-title">👤 '+c.fio+'</div><div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);margin-bottom:12px">'+pn(c.pos)+' · '+pr(c.pos)+' ₽/ч · '+(c.age||'—')+' лет'+(c.phone?' · '+c.phone:'')+'</div>'+(w?'<div class="form-group"><label class="form-label">Статус</label><select class="form-select" id="fs">'+sts+'</select></div><button class="form-btn" id="buc" data-id="'+c.id+'">ОБНОВИТЬ</button><button class="form-btn" style="background:var(--accent)" id="bhc" data-id="'+c.id+'">✅ В ШТАТ</button><div class="form-group"><label class="form-label">Причина отказа</label><select class="form-select" id="frr">'+rejectOpts()+'</select></div><button class="form-btn form-btn-danger" id="brc" data-id="'+c.id+'">ОТКАЗАТЬ</button>':'<div class="readonly-banner">🔒 Просмотр</div>')+'<button class="form-btn form-btn-gray" id="bx">ЗАКРЫТЬ</button>');}
+
+function mViewE(id){const e=DB.employees.find(x=>x.id===id);if(!e)return;const c=calcPay(e);
+om('<div class="modal-title">👤 '+e.fio+'</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--text2);margin-bottom:12px;line-height:1.8">'+pn(e.pos)+' · '+pr(e.pos)+' ₽/ч<br>Вахта с: '+fd(e.vahtaStart)+'<br>Часов: '+c.hrs+' · Смен: '+c.smen+'<br>Оклад начисл: '+Math.round(c.oklNachisl).toLocaleString()+' ₽<br>Взносы: '+Math.round(c.vznosy).toLocaleString()+' ₽<br>НДФЛ: '+Math.round(c.ndfl).toLocaleString()+' ₽<br>На руки: <b>'+Math.round(c.total).toLocaleString()+' ₽</b></div><div class="card"><div class="ctitle">🏦 Реквизиты</div><div class="sitem"><span class="sname-sub">Банк</span><span class="sname">'+(e.bank||'—')+'</span></div><div class="sitem"><span class="sname-sub">БИК</span><span class="sname">'+(e.bik||'—')+'</span></div><div class="sitem"><span class="sname-sub">Р/с</span><span class="sname" style="font-size:.7rem">'+(e.rs||'—')+'</span></div><div class="sitem"><span class="sname-sub">Карта</span><span class="sname">'+(e.card||'—')+'</span></div><div class="sitem"><span class="sname-sub">Тел. карты</span><span class="sname">'+(e.cardPhone||'—')+'</span></div></div>'+(canWrite('staff')?'<button class="form-btn" id="bedit" data-id="'+e.id+'">✏️ РЕДАКТИРОВАТЬ</button>':'')+'<button class="form-btn form-btn-gray" id="bx">ЗАКРЫТЬ</button>');}
+
+function mEditE(id){const e=DB.employees.find(x=>x.id===id);if(!e)return;
+om('<div class="modal-title">✏️ '+e.fio+'</div><div class="form-group"><label class="form-label">Дата начала вахты</label><input class="form-input" id="evs" value="'+(e.vahtaStart||'')+'"></div><div class="form-group"><label class="form-label">Банк</label><input class="form-input" id="ebank" value="'+(e.bank||'')+'"></div><div class="form-row"><div class="form-group"><label class="form-label">БИК</label><input class="form-input" id="ebik" value="'+(e.bik||'')+'"></div><div class="form-group"><label class="form-label">Тел. карты</label><input class="form-input" id="ecph" value="'+(e.cardPhone||'')+'"></div></div><div class="form-group"><label class="form-label">Р/с</label><input class="form-input" id="ers" value="'+(e.rs||'')+'"></div><div class="form-group"><label class="form-label">№ карты</label><input class="form-input" id="ecard" value="'+(e.card||'')+'"></div><button class="form-btn" id="besave" data-id="'+e.id+'">СОХРАНИТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
 
 function mViewR(id){const r=DB.rejects.find(x=>x.id===id);if(!r)return;const w=curRole==='chief'||curRole==='admin';
-om('<div class="modal-title">🚫 '+r.fio+'</div><div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);margin-bottom:12px">'+pn(r.pos)+' · Причина: '+r.reason+'<br>Этап: '+(CS[r.stage]||{l:r.stage}).l+' · '+fd(r.date)+'</div>'+(w&&r.canRecall?'<button class="form-btn" id="brecall" data-id="'+r.id+'">🔄 ВЕРНУТЬ В ПОДБОР</button>':'')+(r.canRecall?'<div style="font-family:var(--mono);font-size:.58rem;color:var(--gold);margin-bottom:8px;text-align:center">Незначительное отклонение — возможен возврат</div>':'')+'<button class="form-btn form-btn-gray" id="bx">ЗАКРЫТЬ</button>');}
+om('<div class="modal-title">🚫 '+r.fio+'</div><div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);margin-bottom:12px">'+pn(r.pos)+' · '+r.reason+'</div>'+(w&&r.canRecall?'<button class="form-btn" id="brecall" data-id="'+r.id+'">🔄 ВЕРНУТЬ</button>':'')+'<button class="form-btn form-btn-gray" id="bx">ЗАКРЫТЬ</button>');}
 
-function mAddS(){const eo=DB.employees.map(e=>'<option value="'+e.id+'">'+e.fio+' ('+pn(e.pos)+')</option>').join('');om('<div class="modal-title">🦺 Выдать СИЗ</div><div class="form-group"><label class="form-label">Сотрудник</label><select class="form-select" id="fse">'+eo+'</select></div><div class="form-group"><label class="form-label">Наименование</label><input class="form-input" id="fsi" placeholder="Куртка утеплённая"></div><div class="form-row"><div class="form-group"><label class="form-label">Дата выдачи</label><input class="form-input" id="fsd" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div><div class="form-group"><label class="form-label">Срок годности</label><input class="form-input" id="fsx" type="date"></div></div><button class="form-btn" id="bss">ВЫДАТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
+function mAddS(){const eo=DB.employees.map(e=>'<option value="'+e.id+'">'+e.fio+'</option>').join('');om('<div class="modal-title">🦺 Выдать СИЗ</div><div class="form-group"><label class="form-label">Сотрудник</label><select class="form-select" id="fse">'+eo+'</select></div><div class="form-group"><label class="form-label">Наименование</label><input class="form-input" id="fsi" placeholder="Куртка"></div><div class="form-row"><div class="form-group"><label class="form-label">Выдача</label><input class="form-input" id="fsd" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div><div class="form-group"><label class="form-label">Годен до</label><input class="form-input" id="fsx" type="date"></div></div><button class="form-btn" id="bss">ВЫДАТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
 
 function mAssignB(rid,bi){const eo=DB.employees.map(e=>'<option value="'+e.id+'">'+e.fio+'</option>').join('');om('<div class="modal-title">🛏️ Заселить</div><div class="form-group"><label class="form-label">Сотрудник</label><select class="form-select" id="fbe">'+eo+'</select></div><button class="form-btn" id="bsb" data-r="'+rid+'" data-b="'+bi+'">ЗАСЕЛИТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
 
-function bindE(){$$('[data-go]').forEach(el=>el.onclick=()=>{if(canSee(el.dataset.go))sp(el.dataset.go);});$$('[data-a]').forEach(el=>{el.onclick=()=>{const a=el.dataset.a;if(a==='addC'&&canWrite('recruit'))mAddC();else if(a==='viewC')mViewC(el.dataset.id);else if(a==='viewR')mViewR(el.dataset.id);else if(a==='addS'&&canWrite('siz'))mAddS();else if(a==='assignB'&&canWrite('hostel'))mAssignB(el.dataset.r,parseInt(el.dataset.b));else if(a==='exportTab')toast('Выгрузка табеля — в разработке');};});}
+function bindE(){$$('[data-go]').forEach(el=>el.onclick=()=>{if(canSee(el.dataset.go))sp(el.dataset.go);});$$('[data-a]').forEach(el=>{el.onclick=()=>{const a=el.dataset.a;if(a==='addC'&&canWrite('recruit'))mAddC();else if(a==='viewC')mViewC(el.dataset.id);else if(a==='viewE')mViewE(el.dataset.id);else if(a==='viewR')mViewR(el.dataset.id);else if(a==='addS'&&canWrite('siz'))mAddS();else if(a==='assignB'&&canWrite('hostel'))mAssignB(el.dataset.r,parseInt(el.dataset.b));else if(a==='exportXlsx')exportXlsx();};});
+// Tabель: input handlers
+$$('.tbl input[data-d]').forEach(inp=>{inp.onchange=function(){const e=DB.employees.find(x=>x.id===this.dataset.eid);if(e){if(!e.hours)e.hours=new Array(14).fill(0);e.hours[parseInt(this.dataset.d)]=parseInt(this.value)||0;render();}};});
+$$('.tbl input[data-f]').forEach(inp=>{inp.onchange=function(){const e=DB.employees.find(x=>x.id===this.dataset.eid);if(e){e[this.dataset.f]=parseInt(this.value)||0;render();}};});
+}
+
+// XLSX export via CSV (no external libs needed)
+function exportXlsx(){
+let csv='№;ФИО;Телефон;Должность;Дата вахты;';
+for(let d=1;d<=14;d++)csv+='Д'+d+';';
+csv+='Часов;Смен;Оклад начисл;Взносы;НДФЛ;Оклад на руки;Комп вахты;Подрядчик;Премия;Штраф;ИТОГО на руки;Банк;БИК;Р/с;Карта;Тел карты\n';
+DB.employees.forEach((e,i)=>{
+const c=calcPay(e);
+csv+=(i+1)+';'+e.fio+';'+(e.cardPhone||'')+';'+pn(e.pos)+';'+(e.vahtaStart||'')+';';
+for(let d=0;d<14;d++)csv+=((e.hours&&e.hours[d])||0)+';';
+csv+=c.hrs+';'+c.smen+';'+Math.round(c.oklNachisl)+';'+Math.round(c.vznosy)+';'+Math.round(c.ndfl)+';'+Math.round(c.oklNaRuki)+';'+Math.round(c.comp)+';'+Math.round(c.podr)+';'+c.bonus+';'+c.penalty+';'+Math.round(c.total)+';'+(e.bank||'')+';'+(e.bik||'')+';'+(e.rs||'')+';'+(e.card||'')+';'+(e.cardPhone||'')+'\n';
+});
+const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='tabel-aeromart-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+toast('Табель выгружен 📥');
+}
 
 document.addEventListener('click',function(e){const t=e.target;
 if(t.id==='bx')cm();
-if(t.id==='bsc'){const f=$('#ff').value.trim();if(!f){toast('Введите ФИО');return;}const inR=DB.rejects.find(r=>r.fio.toLowerCase()===f.toLowerCase());if(inR){toast('⚠️ В базе отказов: '+inR.reason);return;}let pos=$('#fp').value;if(pos==='other'){const ov=$('#fpOther').value.trim();if(!ov){toast('Введите должность');return;}}DB.candidates.unshift({id:uid(),fio:f,pos:pos,age:parseInt($('#fa').value)||0,status:'new',date:new Date().toISOString().slice(0,10),phone:$('#fph').value||''});cm();render();toast('Добавлен ✅');}
-if(t.id==='buc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){c.status=$('#fs').value;cm();render();toast('Статус обновлён ✅');}}
-if(t.id==='bhc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){c.status='hired';DB.employees.push({id:uid(),fio:c.fio,pos:c.pos,shift:'А',status:'on',hired:new Date().toISOString().slice(0,10),hostelRate:HOSTEL_RATE});cm();render();toast(c.fio+' принят 🎉');}}
-if(t.id==='brc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){let reason=$('#frr').value;if(reason==='Другое…'){reason=$('#frrOther').value.trim();if(!reason){toast('Укажите причину');return;}}const prev=c.status;c.status='reject';DB.rejects.push({id:uid(),fio:c.fio,pos:c.pos,reason:reason,stage:prev,date:new Date().toISOString().slice(0,10),canRecall:true});cm();render();toast('В базу отказов');}}
-if(t.id==='brecall'){const r=DB.rejects.find(x=>x.id===t.dataset.id);if(r){DB.candidates.unshift({id:uid(),fio:r.fio,pos:r.pos,age:0,status:'new',date:new Date().toISOString().slice(0,10),phone:''});r.canRecall=false;r.reason+=' → возвращён';cm();render();toast(r.fio+' возвращён 🔄');}}
+if(t.id==='bsc'){const f=$('#ff').value.trim();if(!f){toast('Введите ФИО');return;}const inR=DB.rejects.find(r=>r.fio.toLowerCase()===f.toLowerCase());if(inR){toast('⚠️ В базе отказов: '+inR.reason);return;}DB.candidates.unshift({id:uid(),fio:f,pos:$('#fp').value,age:parseInt($('#fa').value)||0,status:'new',date:new Date().toISOString().slice(0,10),phone:$('#fph').value||''});cm();render();toast('Добавлен ✅');}
+if(t.id==='buc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){c.status=$('#fs').value;cm();render();toast('Обновлено ✅');}}
+if(t.id==='bhc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){c.status='hired';DB.employees.push({id:uid(),fio:c.fio,pos:c.pos,shift:'А',status:'on',hired:new Date().toISOString().slice(0,10),vahtaStart:'',bank:'',bik:'',rs:'',card:'',cardPhone:c.phone||'',hours:new Array(14).fill(0),bonus:0,penalty:0});cm();render();toast(c.fio+' принят 🎉');}}
+if(t.id==='brc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){let reason=$('#frr').value;const prev=c.status;c.status='reject';DB.rejects.push({id:uid(),fio:c.fio,pos:c.pos,reason:reason,stage:prev,date:new Date().toISOString().slice(0,10),canRecall:true});cm();render();toast('В базу отказов');}}
+if(t.id==='brecall'){const r=DB.rejects.find(x=>x.id===t.dataset.id);if(r){DB.candidates.unshift({id:uid(),fio:r.fio,pos:r.pos,age:0,status:'new',date:new Date().toISOString().slice(0,10),phone:''});r.canRecall=false;r.reason+=' → возвращён';cm();render();toast('Возвращён 🔄');}}
+if(t.id==='bedit'){cm();mEditE(t.dataset.id);}
+if(t.id==='besave'){const e=DB.employees.find(x=>x.id===t.dataset.id);if(e){e.vahtaStart=$('#evs').value;e.bank=$('#ebank').value;e.bik=$('#ebik').value;e.rs=$('#ers').value;e.card=$('#ecard').value;e.cardPhone=$('#ecph').value;cm();render();toast('Сохранено ✅');}}
 if(t.id==='bss'){const it=$('#fsi').value.trim();if(!it){toast('Введите наименование');return;}const ex=$('#fsx').value;let st='ok';if(ex){const d=new Date(ex),n=new Date();if(d<n)st='expired';else if((d-n)/(864e5)<30)st='soon';}DB.siz.push({id:uid(),eid:$('#fse').value,item:it,exp:ex,st});cm();render();toast('СИЗ выдан ✅');}
 if(t.id==='bsb'){const r=DB.rooms.find(x=>x.id===t.dataset.r);if(r){const emp=DB.employees.find(e=>e.id===$('#fbe').value);r.beds[parseInt(t.dataset.b)]={n:emp?ini(emp.fio):'??',e:emp?emp.id:null};cm();render();toast('Заселён ✅');}}
 });
