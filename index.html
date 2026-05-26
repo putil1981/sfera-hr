@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d0d0d">
+<title>СФЕРА HR</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0d0d;--bg2:#141414;--bg3:#1c1c1c;--surface:#181818;--border:#252525;--text:#ddd5c8;--text2:#8a7a6a;--text3:#4a3f35;--accent:#4a9e6a;--accent2:#2d7a4a;--gold:#c8a96e;--red:#c1121f;--red-bg:#1a0508;--orange:#c4622d;--orange-bg:#1a0f05;--blue:#4a7ec1;--blue-bg:#0a1520;--green:#4a9e6a;--green-bg:#0a2018;--mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.header-left{display:flex;align-items:center;gap:10px}
+.logo{font-family:var(--mono);font-weight:700;font-size:.82rem;letter-spacing:.12em;color:var(--accent)}
+.logo-sub{font-family:var(--mono);font-size:.5rem;color:var(--text3);letter-spacing:.06em}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.htime{font-family:var(--mono);font-size:.62rem;color:var(--text3)}
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:10px 14px;font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;user-select:none}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.content{flex:1;overflow:hidden;position:relative}
+.page{display:none;position:absolute;inset:0;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+.page.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.ctitle{font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;color:var(--text3);margin-bottom:12px;text-transform:uppercase}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 4px;text-align:center;cursor:pointer}
+.micon{font-size:1.3rem;margin-bottom:4px}
+.mval{font-family:var(--mono);font-size:1.1rem;font-weight:700;display:block;color:var(--accent)}
+.mval.red{color:var(--red)}.mval.orange{color:var(--orange)}.mval.gold{color:var(--gold)}
+.mlabel{font-size:.48rem;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+.sitem{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bg3);cursor:pointer}
+.sitem:last-child{border-bottom:none}
+.sname{font-size:.78rem}.sname-sub{font-family:var(--mono);font-size:.52rem;color:var(--text3)}
+.badge{font-family:var(--mono);font-size:.54rem;padding:3px 8px;border-radius:3px}
+.bg{background:var(--green-bg);color:var(--green)}.br{background:var(--red-bg);color:var(--red)}.bo{background:var(--orange-bg);color:var(--orange)}.bb{background:var(--blue-bg);color:var(--blue)}.bgray{background:var(--bg3);color:var(--text3)}
+.cand{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg3);cursor:pointer}
+.cand:last-child{border-bottom:none}
+.cand-ava{width:36px;height:36px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-family:var(--mono);color:var(--text2)}
+.cand-info{flex:1;min-width:0}
+.cand-name{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cand-meta{font-family:var(--mono);font-size:.5rem;color:var(--text3);margin-top:2px}
+.funnel{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.funnel-row{display:flex;align-items:center;gap:8px}
+.funnel-bar{height:22px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-family:var(--mono);font-size:.52rem;color:var(--text)}
+.funnel-count{font-family:var(--mono);font-size:.7rem;font-weight:700;min-width:24px}
+.alert{display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:6px;margin-bottom:6px;font-size:.76rem;line-height:1.4}
+.alert-red{background:var(--red-bg);border:1px solid #2a0a0e}.alert-orange{background:var(--orange-bg);border:1px solid #2a1a0a}
+.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+.action-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 10px;text-align:center;cursor:pointer}
+.action-btn:active{border-color:var(--accent);transform:scale(.97)}
+.action-icon{font-size:1.5rem;margin-bottom:6px}
+.action-label{font-family:var(--mono);font-size:.52rem;letter-spacing:.08em;color:var(--text2);text-transform:uppercase}
+.room{background:var(--bg3);border-radius:6px;padding:10px;margin-bottom:6px}
+.room-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.room-name{font-family:var(--mono);font-size:.7rem;font-weight:700}
+.room-beds{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.bed{height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.5rem;font-family:var(--mono);cursor:pointer}
+.bed-free{background:var(--green-bg);border:1px solid var(--accent2);color:var(--green)}
+.bed-taken{background:var(--surface);border:1px solid var(--border);color:var(--text2)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px 12px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:20px 16px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;color:var(--accent);margin-bottom:16px;text-transform:uppercase}
+.form-group{margin-bottom:12px}
+.form-label{font-family:var(--mono);font-size:.52rem;color:var(--text3);margin-bottom:4px;display:block;text-transform:uppercase}
+.form-input,.form-select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);font-family:var(--sans);font-size:.82rem;outline:none;-webkit-appearance:none}
+.form-input:focus,.form-select:focus{border-color:var(--accent)}
+.form-btn{width:100%;padding:12px;background:var(--accent);color:#0d0d0d;border:none;border-radius:6px;font-family:var(--mono);font-size:.75rem;font-weight:700;cursor:pointer;margin-bottom:8px}
+.form-btn:active{opacity:.8}
+.form-btn-danger{background:var(--red)}
+.form-btn-gray{background:var(--bg3);color:var(--text3)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#0d0d0d;padding:10px 20px;border-radius:8px;font-family:var(--mono);font-size:.7rem;font-weight:700;z-index:200;pointer-events:none}
+.status-line{font-family:var(--mono);font-size:.5rem;color:var(--text3);text-align:center;padding:4px;border-top:1px solid var(--border);flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="header"><div class="header-left"><div class="sdot"></div><div><div class="logo">СФЕРА HR</div><div class="logo-sub">АЭРОМАР</div></div></div><span class="htime" id="clock">--:--:--</span></div>
+<div class="tabs">
+<button class="tab active" data-p="dash">ДЭШБОРД</button>
+<button class="tab" data-p="recruit">ПОДБОР</button>
+<button class="tab" data-p="staff">ШТАТ</button>
+<button class="tab" data-p="siz">СИЗ</button>
+<button class="tab" data-p="hostel">ОБЩЕЖИТИЕ</button>
+<button class="tab" data-p="schedule">ТАБЕЛЬ</button>
+</div>
+<div class="content" id="app"></div>
+<div class="status-line" id="sline">СФЕРА HR v1.0</div>
+<div class="modal-overlay" id="mo"><div class="modal" id="mb"></div></div>
+<script>
+const K='sfera_hr_data';let DB=load();
+function def(){return{candidates:[
+{id:'c1',fio:'Иванов Пётр Сергеевич',pos:'Повар',age:35,status:'check',date:'2026-05-20',phone:'+7-999-111-22-33',dept:'Производство'},
+{id:'c2',fio:'Смирнова Анна Викторовна',pos:'Упаковщик',age:28,status:'med',date:'2026-05-19',phone:'+7-999-222-33-44',dept:'Производство'},
+{id:'c3',fio:'Козлов Дмитрий Алексеевич',pos:'Водитель',age:42,status:'ready',date:'2026-05-18',phone:'+7-999-333-44-55',dept:'Доставка'},
+{id:'c4',fio:'Морозова Елена Игоревна',pos:'Мойщица',age:31,status:'new',date:'2026-05-21',dept:'Уборка'},
+{id:'c5',fio:'Тимофеев Руслан Олегович',pos:'Экспедитор',age:26,status:'new',date:'2026-05-22',dept:'Доставка'}],
+employees:[
+{id:'e1',fio:'Абрамов Виктор Иванович',pos:'Повар',dept:'Производство',shift:'А',status:'on',hired:'2024-03-15'},
+{id:'e2',fio:'Белова Наталья Сергеевна',pos:'Упаковщик',dept:'Производство',shift:'Б',status:'off',hired:'2023-09-01'},
+{id:'e3',fio:'Волков Андрей Петрович',pos:'Водитель',dept:'Доставка',shift:'А',status:'on',hired:'2022-06-10'},
+{id:'e4',fio:'Григорьева Екатерина Дмитриевна',pos:'Мойщица',dept:'Уборка',shift:'Б',status:'sick',hired:'2025-01-20'},
+{id:'e5',fio:'Давыдов Кирилл Романович',pos:'Экспедитор',dept:'Доставка',shift:'А',status:'on',hired:'2024-11-05'}],
+siz:[
+{id:'s1',eid:'e1',item:'Куртка утеплённая',exp:'2026-05-15',st:'expired'},
+{id:'s2',eid:'e2',item:'Перчатки х/б',exp:'2026-05-18',st:'expired'},
+{id:'s3',eid:'e3',item:'Ботинки защитные',exp:'2026-05-20',st:'expired'},
+{id:'s4',eid:'e4',item:'Халат рабочий',exp:'2026-06-01',st:'soon'},
+{id:'s5',eid:'e5',item:'Каска защитная',exp:'2026-06-08',st:'soon'},
+{id:'s6',eid:'e1',item:'Фартук',exp:'2027-01-10',st:'ok'},
+{id:'s7',eid:'e2',item:'Халат рабочий',exp:'2027-03-01',st:'ok'}],
+rooms:[
+{id:'r1',name:'К.101',bld:'Корпус 1',beds:[{n:'АВ',e:'e1'},{n:'КР',e:null},{n:'МД',e:'e3'},{n:null,e:null}]},
+{id:'r2',name:'К.102',bld:'Корпус 1',beds:[{n:'ПС',e:'e2'},{n:'ВИ',e:'e5'},{n:'НА',e:'e4'},{n:'ТЕ',e:null}]},
+{id:'r3',name:'К.201',bld:'Корпус 2',beds:[{n:'РА',e:null},{n:null,e:null},{n:null,e:null},{n:null,e:null}]}],
+transfers:[{r:'Маршрут А',d:'Общежитие → Шереметьево',t:'06:00'},{r:'Маршрут Б',d:'Шереметьево → Общежитие',t:'18:30'},{r:'Маршрут В',d:'Ночная смена',t:'22:00'}],
+depts:{'Производство':1240,'Доставка':380,'Уборка':290,'Склад':185,'Администрация':142,'Транспорт':120,'Техслужба':130}}}
+function load(){try{const s=JSON.parse(localStorage.getItem(K));return s&&s.candidates?s:def();}catch{return def();}}
+function save(){try{localStorage.setItem(K,JSON.stringify(DB));}catch{}}
+function $(s){return document.querySelector(s)}
+function $$(s){return document.querySelectorAll(s)}
+function ini(f){return f.split(' ').map(w=>w[0]).slice(0,2).join('')}
+function uid(){return 'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2000);}
+function fd(d){if(!d)return'—';const p=d.split('-');return p[2]+'.'+p[1];}
+function en(id){const e=DB.employees.find(x=>x.id===id);return e?e.fio:'—';}
+const CS={new:{l:'Отклик',c:'bgray'},check:{l:'Проверка',c:'bb'},med:{l:'Медосмотр',c:'bo'},docs:{l:'Оформление',c:'bg'},ready:{l:'Готов',c:'bg'},hired:{l:'Вышел',c:'bg'},reject:{l:'Отказ',c:'br'}};
+const ES={on:{l:'На смене',c:'bg'},off:{l:'Выходной',c:'bgray'},sick:{l:'Больничный',c:'bo'},vacation:{l:'Отпуск',c:'bb'}};
+let cp='dash';
+function sp(id){cp=id;$$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.p===id));render();}
+function render(){$('#app').innerHTML='<div class="page active" style="position:relative;display:block">'+P[cp]()+'</div>';bindE();}
+const P={
+dash(){
+const te=Object.values(DB.depts).reduce((a,b)=>a+b,0);
+const cn=DB.candidates.filter(c=>c.status!=='hired'&&c.status!=='reject').length;
+const se=DB.siz.filter(s=>s.st==='expired').length;
+const fb=DB.rooms.reduce((a,r)=>a+r.beds.filter(b=>!b.e).length,0);
+const al=[];
+if(se)al.push({t:'red',i:'🔴',x:'СИЗ просрочен у <b>'+se+'</b> сотрудников'});
+const nc=DB.candidates.filter(c=>c.status==='new').length;
+if(nc)al.push({t:'orange',i:'🟠',x:'<b>'+nc+'</b> новых откликов ждут обработки'});
+return`<div class="mgrid">
+<div class="metric" data-go="staff"><div class="micon">👥</div><span class="mval">${te}</span><div class="mlabel">В штате</div></div>
+<div class="metric" data-go="recruit"><div class="micon">🔍</div><span class="mval gold">${cn}</span><div class="mlabel">Кандидаты</div></div>
+<div class="metric" data-go="siz"><div class="micon">🦺</div><span class="mval ${se?'red':''}">${se}</span><div class="mlabel">СИЗ просрочен</div></div>
+<div class="metric" data-go="hostel"><div class="micon">🏠</div><span class="mval">${fb}</span><div class="mlabel">Койки свободны</div></div>
+</div>
+<div class="actions">
+<div class="action-btn" data-a="addC"><div class="action-icon">📋</div><div class="action-label">Новый кандидат</div></div>
+<div class="action-btn" data-a="addS"><div class="action-icon">🦺</div><div class="action-label">Выдать СИЗ</div></div>
+<div class="action-btn" data-go="hostel"><div class="action-icon">🛏️</div><div class="action-label">Заселить</div></div>
+<div class="action-btn" data-go="schedule"><div class="action-icon">📊</div><div class="action-label">Табель</div></div>
+</div>
+${al.length?'<div class="card"><div class="ctitle">⚡ Срочное</div>'+al.map(a=>'<div class="alert alert-'+a.t+'"><span>'+a.i+'</span><div>'+a.x+'</div></div>').join('')+'</div>':''}
+<div class="card"><div class="ctitle">👤 Последние кандидаты</div>${DB.candidates.slice(0,4).map(c=>'<div class="cand" data-a="viewC" data-id="'+c.id+'"><div class="cand-ava">'+ini(c.fio)+'</div><div class="cand-info"><div class="cand-name">'+c.fio+'</div><div class="cand-meta">'+c.pos+' · '+c.dept+'</div></div><span class="badge '+(CS[c.status]||{c:'bgray'}).c+'">'+(CS[c.status]||{l:c.status}).l+'</span></div>').join('')}</div>`;},
+recruit(){
+const bs={};DB.candidates.forEach(c=>{bs[c.status]=(bs[c.status]||0)+1;});const tot=DB.candidates.length||1;
+const st=[{k:'new',l:'Отклик',bg:'var(--blue-bg)',br:'var(--blue)'},{k:'check',l:'Проверка СБ',bg:'var(--orange-bg)',br:'var(--orange)'},{k:'med',l:'Медосмотр',bg:'#1a1a05',br:'var(--gold)'},{k:'docs',l:'Оформление',bg:'var(--green-bg)',br:'var(--green)'},{k:'ready',l:'Готов',bg:'var(--accent)',br:'var(--accent)'}];
+return`<div class="card"><div class="ctitle">📈 Воронка</div><div class="funnel">${st.map(s=>{const n=bs[s.k]||0;return'<div class="funnel-row"><span class="funnel-count">'+n+'</span><div class="funnel-bar" style="width:'+Math.max(8,n/tot*100)+'%;background:'+s.bg+';border:1px solid '+s.br+'">'+s.l+'</div></div>';}).join('')}</div></div>
+<div class="action-btn" data-a="addC" style="margin-bottom:10px;text-align:center"><div class="action-icon">➕</div><div class="action-label">Добавить кандидата</div></div>
+<div class="card"><div class="ctitle">👤 Все (${DB.candidates.length})</div>${DB.candidates.map(c=>'<div class="cand" data-a="viewC" data-id="'+c.id+'"><div class="cand-ava">'+ini(c.fio)+'</div><div class="cand-info"><div class="cand-name">'+c.fio+'</div><div class="cand-meta">'+c.pos+' · '+c.age+' лет · с '+fd(c.date)+'</div></div><span class="badge '+(CS[c.status]||{c:'bgray'}).c+'">'+(CS[c.status]||{l:c.status}).l+'</span></div>').join('')}</div>`;},
+staff(){return`<div class="card"><div class="ctitle">📊 По отделам</div>${Object.entries(DB.depts).map(([d,n])=>'<div class="sitem"><span class="sname">'+d+'</span><span class="badge bg">'+n+'</span></div>').join('')}</div>
+<div class="card"><div class="ctitle">🔍 Сотрудники (${DB.employees.length})</div>${DB.employees.map(e=>'<div class="sitem"><div><div class="sname">'+e.fio+'</div><div class="sname-sub">'+e.pos+' · '+e.dept+' · Смена '+e.shift+'</div></div><span class="badge '+(ES[e.status]||{c:'bgray'}).c+'">'+(ES[e.status]||{l:e.status}).l+'</span></div>').join('')}</div>`;},
+siz(){const ex=DB.siz.filter(s=>s.st==='expired'),so=DB.siz.filter(s=>s.st==='soon'),ok=DB.siz.filter(s=>s.st==='ok');
+return`<div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">${DB.siz.length}</span><div class="mlabel">Выдано</div></div><div class="metric"><span class="mval red">${ex.length}</span><div class="mlabel">Просрочено</div></div><div class="metric"><span class="mval orange">${so.length}</span><div class="mlabel">Замена 30д</div></div></div>
+<div class="action-btn" data-a="addS" style="margin-bottom:10px;text-align:center"><div class="action-icon">➕</div><div class="action-label">Выдать СИЗ</div></div>
+${ex.length?'<div class="card"><div class="ctitle">🔴 Просроченные</div>'+ex.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge br">истёк '+fd(s.exp)+'</span></div>').join('')+'</div>':''}
+${so.length?'<div class="card"><div class="ctitle">🟠 Скоро</div>'+so.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge bo">'+fd(s.exp)+'</span></div>').join('')+'</div>':''}
+${ok.length?'<div class="card"><div class="ctitle">✅ Норма</div>'+ok.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge bg">до '+fd(s.exp)+'</span></div>').join('')+'</div>':''}`;},
+hostel(){const blds={};DB.rooms.forEach(r=>{if(!blds[r.bld])blds[r.bld]=[];blds[r.bld].push(r);});
+const fb=DB.rooms.reduce((a,r)=>a+r.beds.filter(b=>!b.e).length,0),tb=DB.rooms.reduce((a,r)=>a+r.beds.length,0);
+return`<div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">${tb}</span><div class="mlabel">Всего</div></div><div class="metric"><span class="mval">${tb-fb}</span><div class="mlabel">Заселено</div></div><div class="metric"><span class="mval" style="color:var(--green)">${fb}</span><div class="mlabel">Свободно</div></div></div>
+${Object.entries(blds).map(([b,rs])=>'<div class="card"><div class="ctitle">🏠 '+b+'</div>'+rs.map(r=>{const tk=r.beds.filter(b=>b.e).length;return'<div class="room"><div class="room-header"><span class="room-name">'+r.name+'</span><span class="badge '+(tk===r.beds.length?'bg':'bo')+'">'+tk+'/'+r.beds.length+'</span></div><div class="room-beds">'+r.beds.map((bed,i)=>bed.e?'<div class="bed bed-taken">'+(bed.n||'??')+'</div>':'<div class="bed bed-free" data-a="assignB" data-r="'+r.id+'" data-b="'+i+'">—</div>').join('')+'</div></div>';}).join('')+'</div>').join('')}
+<div class="card"><div class="ctitle">🚐 Трансфер</div>${DB.transfers.map(t=>'<div class="sitem"><span class="sname">'+t.r+'<span class="sname-sub" style="display:block">'+t.d+'</span></span><span class="badge bg">'+t.t+'</span></div>').join('')}</div>`;},
+schedule(){const on=DB.employees.filter(e=>e.status==='on'),sk=DB.employees.filter(e=>e.status==='sick'),vc=DB.employees.filter(e=>e.status==='vacation'),of=DB.employees.filter(e=>e.status==='off');
+return`<div class="card"><div class="ctitle">📅 Сегодня</div><div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">${on.length}</span><div class="mlabel">На смене</div></div><div class="metric"><span class="mval gold">${vc.length}</span><div class="mlabel">Отпуск</div></div><div class="metric"><span class="mval orange">${sk.length}</span><div class="mlabel">Больничный</div></div></div></div>
+<div class="card"><div class="ctitle">📊 Смены</div>
+<div class="sitem"><span class="sname">Смена А<span class="sname-sub" style="display:block">06:00–18:00</span></span><span class="badge bg">${DB.employees.filter(e=>e.shift==='А'&&e.status==='on').length}</span></div>
+<div class="sitem"><span class="sname">Смена Б<span class="sname-sub" style="display:block">18:00–06:00</span></span><span class="badge bb">${DB.employees.filter(e=>e.shift==='Б'&&e.status==='on').length}</span></div>
+<div class="sitem"><span class="sname">Выходные</span><span class="badge bgray">${of.length}</span></div></div>
+<div class="card"><div class="ctitle">🤒 Больничные</div>${sk.length?sk.map(e=>'<div class="sitem"><span class="sname">'+e.fio+'<span class="sname-sub" style="display:block">'+e.pos+'</span></span><span class="badge bo">больничный</span></div>').join(''):'<div style="font-family:var(--mono);font-size:.65rem;color:var(--text3);padding:10px;text-align:center">Нет больничных 👍</div>'}</div>`;}
+};
+function om(h){$('#mb').innerHTML=h;$('#mo').classList.add('open');}
+function cm(){$('#mo').classList.remove('open');}
+function mAddC(){const dp=Object.keys(DB.depts).map(d=>'<option>'+d+'</option>').join('');
+om('<div class="modal-title">➕ Новый кандидат</div><div class="form-group"><label class="form-label">ФИО</label><input class="form-input" id="ff" placeholder="Иванов Иван Иванович"></div><div class="form-row"><div class="form-group"><label class="form-label">Должность</label><input class="form-input" id="fp" placeholder="Повар"></div><div class="form-group"><label class="form-label">Возраст</label><input class="form-input" id="fa" type="number" placeholder="30"></div></div><div class="form-row"><div class="form-group"><label class="form-label">Отдел</label><select class="form-select" id="fd">'+dp+'</select></div><div class="form-group"><label class="form-label">Телефон</label><input class="form-input" id="fph" placeholder="+7-999-..."></div></div><button class="form-btn" id="bsc">ДОБАВИТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
+function mViewC(id){const c=DB.candidates.find(x=>x.id===id);if(!c)return;
+const sts=Object.entries(CS).map(([k,v])=>'<option value="'+k+'"'+(c.status===k?' selected':'')+'>'+v.l+'</option>').join('');
+om('<div class="modal-title">👤 '+c.fio+'</div><div style="font-family:var(--mono);font-size:.6rem;color:var(--text3);margin-bottom:12px">'+c.pos+' · '+c.dept+' · '+c.age+' лет</div><div class="form-group"><label class="form-label">Статус</label><select class="form-select" id="fs">'+sts+'</select></div><button class="form-btn" id="buc" data-id="'+c.id+'">ОБНОВИТЬ</button><button class="form-btn" style="background:var(--accent)" id="bhc" data-id="'+c.id+'">✅ ПРИНЯТЬ</button><button class="form-btn form-btn-danger" id="brc" data-id="'+c.id+'">ОТКАЗАТЬ</button><button class="form-btn form-btn-gray" id="bx">ЗАКРЫТЬ</button>');}
+function mAddS(){const eo=DB.employees.map(e=>'<option value="'+e.id+'">'+e.fio+'</option>').join('');
+om('<div class="modal-title">🦺 Выдать СИЗ</div><div class="form-group"><label class="form-label">Сотрудник</label><select class="form-select" id="fse">'+eo+'</select></div><div class="form-group"><label class="form-label">Наименование</label><input class="form-input" id="fsi" placeholder="Куртка утеплённая"></div><div class="form-row"><div class="form-group"><label class="form-label">Дата выдачи</label><input class="form-input" id="fsd" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div><div class="form-group"><label class="form-label">Срок годности</label><input class="form-input" id="fsx" type="date"></div></div><button class="form-btn" id="bss">ВЫДАТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
+function mAssignB(rid,bi){const eo=DB.employees.map(e=>'<option value="'+e.id+'">'+e.fio+'</option>').join('');
+om('<div class="modal-title">🛏️ Заселить</div><div class="form-group"><label class="form-label">Сотрудник</label><select class="form-select" id="fbe">'+eo+'</select></div><button class="form-btn" id="bsb" data-r="'+rid+'" data-b="'+bi+'">ЗАСЕЛИТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
+function bindE(){$$('[data-go]').forEach(el=>el.onclick=()=>sp(el.dataset.go));
+$$('[data-a]').forEach(el=>{el.onclick=()=>{const a=el.dataset.a;
+if(a==='addC')mAddC();else if(a==='viewC')mViewC(el.dataset.id);else if(a==='addS')mAddS();else if(a==='assignB')mAssignB(el.dataset.r,parseInt(el.dataset.b));}});}
+document.addEventListener('click',function(e){const t=e.target;
+if(t.id==='bx')cm();
+if(t.id==='mo')cm();
+if(t.id==='bsc'){const f=$('#ff').value.trim();if(!f){toast('Введите ФИО');return;}DB.candidates.unshift({id:uid(),fio:f,pos:$('#fp').value||'—',age:parseInt($('#fa').value)||0,status:'new',date:new Date().toISOString().slice(0,10),phone:$('#fph').value||'',dept:$('#fd').value||'Производство'});save();cm();render();toast('Добавлен ✅');}
+if(t.id==='buc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){c.status=$('#fs').value;save();cm();render();toast('Обновлён ✅');}}
+if(t.id==='bhc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){c.status='hired';DB.employees.push({id:uid(),fio:c.fio,pos:c.pos,dept:c.dept,shift:'А',status:'on',hired:new Date().toISOString().slice(0,10)});save();cm();render();toast(c.fio+' принят 🎉');}}
+if(t.id==='brc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){c.status='reject';save();cm();render();toast('Отклонён');}}
+if(t.id==='bss'){const it=$('#fsi').value.trim();if(!it){toast('Введите наименование');return;}const ex=$('#fsx').value;let st='ok';if(ex){const d=new Date(ex),n=new Date();if(d<n)st='expired';else if((d-n)/(864e5)<30)st='soon';}DB.siz.push({id:uid(),eid:$('#fse').value,item:it,exp:ex,st});save();cm();render();toast('СИЗ выдан ✅');}
+if(t.id==='bsb'){const r=DB.rooms.find(x=>x.id===t.dataset.r);if(r){const emp=DB.employees.find(e=>e.id===$('#fbe').value);r.beds[parseInt(t.dataset.b)]={n:emp?ini(emp.fio):'??',e:emp?emp.id:null};save();cm();render();toast('Заселён ✅');}}
+});
+$('#mo').addEventListener('click',function(e){if(e.target===this)cm();});
+$$('.tab').forEach(t=>t.addEventListener('click',()=>sp(t.dataset.p)));
+setInterval(()=>{$('#clock').textContent=new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit',second:'2-digit'});},1000);
+$('#clock').textContent=new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+render();$('#sline').textContent='СФЕРА HR v1.0 · '+DB.candidates.length+' кандидатов · '+DB.employees.length+' сотрудников';
+</script>
+</body>
+</html>
