@@ -8,122 +8,181 @@
 <title>СФЕРА HR</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0d0d0d;--bg2:#141414;--bg3:#1c1c1c;--surface:#181818;--border:#252525;--text:#ddd5c8;--text2:#8a7a6a;--text3:#4a3f35;--accent:#4a9e6a;--accent2:#2d7a4a;--gold:#c8a96e;--red:#c1121f;--red-bg:#1a0508;--orange:#c4622d;--orange-bg:#1a0f05;--blue:#4a7ec1;--blue-bg:#0a1520;--green:#4a9e6a;--green-bg:#0a2018;--mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif}
+:root{--bg:#0d0d0d;--bg2:#141414;--bg3:#1c1c1c;--surface:#181818;--border:#2a2a2a;--text:#e8e0d4;--text2:#a89a88;--text3:#6a5c4e;--accent:#4a9e6a;--accent2:#2d7a4a;--gold:#c8a96e;--red:#c1121f;--red-bg:#1a0508;--orange:#c4622d;--orange-bg:#1a0f05;--blue:#4a7ec1;--blue-bg:#0a1520;--green:#4a9e6a;--green-bg:#0a2018;--mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+.login-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+.login-screen.hidden{display:none}
+.login-logo{font-family:var(--mono);font-size:1.4rem;font-weight:700;color:var(--accent);letter-spacing:.15em}
+.login-sub{font-family:var(--mono);font-size:.65rem;color:var(--text2);letter-spacing:.08em;margin-top:4px}
+.pin-dots{display:flex;gap:14px;margin:24px 0}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);transition:all .2s}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent)}
+.pin-dot.error{border-color:var(--red);background:var(--red);animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:280px;width:100%;padding:0 30px}
+.pin-key{height:60px;border-radius:12px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:1.4rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none}
+.pin-key:active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.pin-key.empty{background:transparent;border:none;cursor:default}
+.pin-key.del{font-size:.85rem;color:var(--text2)}
+.login-error{font-family:var(--mono);font-size:.7rem;color:var(--red);min-height:1.4em}
+.logout-btn{font-family:var(--mono);font-size:.6rem;color:var(--text2);cursor:pointer;padding:5px 10px;border:1px solid var(--border);border-radius:4px;background:none}
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .header-left{display:flex;align-items:center;gap:10px}
-.logo{font-family:var(--mono);font-weight:700;font-size:.82rem;letter-spacing:.12em;color:var(--accent)}
-.logo-sub{font-family:var(--mono);font-size:.5rem;color:var(--text3);letter-spacing:.06em}
-.sdot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.logo{font-family:var(--mono);font-weight:700;font-size:.95rem;letter-spacing:.12em;color:var(--accent)}
+.logo-sub{font-family:var(--mono);font-size:.6rem;color:var(--text2);letter-spacing:.06em}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.htime{font-family:var(--mono);font-size:.62rem;color:var(--text3)}
+.htime{font-family:var(--mono);font-size:.7rem;color:var(--text2)}
+.header-right{display:flex;align-items:center;gap:10px}
+.role-badge{font-family:var(--mono);font-size:.55rem;padding:4px 8px;border-radius:4px;background:var(--green-bg);color:var(--green);letter-spacing:.06em}
 .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tab{padding:10px 14px;font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;user-select:none}
+.tab{padding:12px 16px;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.08em;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;user-select:none}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.content{flex:1;overflow:hidden;position:relative}
-.page{display:none;position:absolute;inset:0;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
-.page.active{display:block}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.page{padding:14px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
-.ctitle{font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;color:var(--text3);margin-bottom:12px;text-transform:uppercase}
+.ctitle{font-family:var(--mono);font-size:.65rem;letter-spacing:.1em;color:var(--text2);margin-bottom:12px;text-transform:uppercase}
 .mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
 .metric{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 4px;text-align:center;cursor:pointer}
 .micon{font-size:1.3rem;margin-bottom:4px}
-.mval{font-family:var(--mono);font-size:1.1rem;font-weight:700;display:block;color:var(--accent)}
+.mval{font-family:var(--mono);font-size:1.2rem;font-weight:700;display:block;color:var(--accent)}
 .mval.red{color:var(--red)}.mval.orange{color:var(--orange)}.mval.gold{color:var(--gold)}
-.mlabel{font-size:.48rem;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+.mlabel{font-size:.55rem;color:var(--text2);margin-top:3px;font-family:var(--mono)}
 .sitem{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bg3);cursor:pointer}
 .sitem:last-child{border-bottom:none}
-.sname{font-size:.78rem}.sname-sub{font-family:var(--mono);font-size:.52rem;color:var(--text3)}
-.badge{font-family:var(--mono);font-size:.54rem;padding:3px 8px;border-radius:3px}
-.bg{background:var(--green-bg);color:var(--green)}.br{background:var(--red-bg);color:var(--red)}.bo{background:var(--orange-bg);color:var(--orange)}.bb{background:var(--blue-bg);color:var(--blue)}.bgray{background:var(--bg3);color:var(--text3)}
+.sname{font-size:.88rem;color:var(--text)}.sname-sub{font-family:var(--mono);font-size:.6rem;color:var(--text2)}
+.badge{font-family:var(--mono);font-size:.62rem;padding:4px 10px;border-radius:4px;font-weight:700}
+.bg{background:var(--green-bg);color:var(--green)}.br{background:var(--red-bg);color:var(--red)}.bo{background:var(--orange-bg);color:var(--orange)}.bb{background:var(--blue-bg);color:var(--blue)}.bgray{background:var(--bg3);color:var(--text2)}
 .cand{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg3);cursor:pointer}
 .cand:last-child{border-bottom:none}
-.cand-ava{width:36px;height:36px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-family:var(--mono);color:var(--text2)}
+.cand-ava{width:38px;height:38px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-family:var(--mono);color:var(--text2)}
 .cand-info{flex:1;min-width:0}
-.cand-name{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cand-meta{font-family:var(--mono);font-size:.5rem;color:var(--text3);margin-top:2px}
+.cand-name{font-size:.9rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cand-meta{font-family:var(--mono);font-size:.58rem;color:var(--text2);margin-top:2px}
 .funnel{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 .funnel-row{display:flex;align-items:center;gap:8px}
-.funnel-bar{height:22px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-family:var(--mono);font-size:.52rem;color:var(--text)}
-.funnel-count{font-family:var(--mono);font-size:.7rem;font-weight:700;min-width:24px}
-.alert{display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:6px;margin-bottom:6px;font-size:.76rem;line-height:1.4}
+.funnel-bar{height:28px;border-radius:4px;display:flex;align-items:center;padding:0 10px;font-family:var(--mono);font-size:.6rem;color:var(--text);white-space:nowrap;min-width:120px}
+.funnel-count{font-family:var(--mono);font-size:.8rem;font-weight:700;min-width:24px}
+.alert{display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:6px;margin-bottom:6px;font-size:.85rem;line-height:1.4}
 .alert-red{background:var(--red-bg);border:1px solid #2a0a0e}.alert-orange{background:var(--orange-bg);border:1px solid #2a1a0a}
 .actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
 .action-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 10px;text-align:center;cursor:pointer}
 .action-btn:active{border-color:var(--accent);transform:scale(.97)}
 .action-icon{font-size:1.5rem;margin-bottom:6px}
-.action-label{font-family:var(--mono);font-size:.52rem;letter-spacing:.08em;color:var(--text2);text-transform:uppercase}
+.action-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;color:var(--text2);text-transform:uppercase}
 .room{background:var(--bg3);border-radius:6px;padding:10px;margin-bottom:6px}
 .room-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.room-name{font-family:var(--mono);font-size:.7rem;font-weight:700}
+.room-name{font-family:var(--mono);font-size:.8rem;font-weight:700;color:var(--text)}
 .room-beds{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
-.bed{height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.5rem;font-family:var(--mono);cursor:pointer}
+.bed{height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-family:var(--mono);cursor:pointer}
 .bed-free{background:var(--green-bg);border:1px solid var(--accent2);color:var(--green)}
 .bed-taken{background:var(--surface);border:1px solid var(--border);color:var(--text2)}
+.readonly-banner{font-family:var(--mono);font-size:.6rem;color:var(--gold);background:rgba(200,169,110,.08);border:1px solid rgba(200,169,110,.15);border-radius:6px;padding:8px 10px;margin-bottom:10px;text-align:center}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:12px 12px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;padding:20px 16px;animation:slideUp .3s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-title{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;color:var(--accent);margin-bottom:16px;text-transform:uppercase}
+.modal-title{font-family:var(--mono);font-size:.8rem;letter-spacing:.1em;color:var(--accent);margin-bottom:16px;text-transform:uppercase}
 .form-group{margin-bottom:12px}
-.form-label{font-family:var(--mono);font-size:.52rem;color:var(--text3);margin-bottom:4px;display:block;text-transform:uppercase}
-.form-input,.form-select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);font-family:var(--sans);font-size:.82rem;outline:none;-webkit-appearance:none}
+.form-label{font-family:var(--mono);font-size:.62rem;color:var(--text2);margin-bottom:4px;display:block;text-transform:uppercase}
+.form-input,.form-select{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);font-family:var(--sans);font-size:.92rem;outline:none;-webkit-appearance:none}
 .form-input:focus,.form-select:focus{border-color:var(--accent)}
-.form-btn{width:100%;padding:12px;background:var(--accent);color:#0d0d0d;border:none;border-radius:6px;font-family:var(--mono);font-size:.75rem;font-weight:700;cursor:pointer;margin-bottom:8px}
+.form-btn{width:100%;padding:13px;background:var(--accent);color:#0d0d0d;border:none;border-radius:6px;font-family:var(--mono);font-size:.82rem;font-weight:700;cursor:pointer;margin-bottom:8px}
 .form-btn:active{opacity:.8}
 .form-btn-danger{background:var(--red)}
-.form-btn-gray{background:var(--bg3);color:var(--text3)}
+.form-btn-gray{background:var(--bg3);color:var(--text2)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#0d0d0d;padding:10px 20px;border-radius:8px;font-family:var(--mono);font-size:.7rem;font-weight:700;z-index:200;pointer-events:none}
-.status-line{font-family:var(--mono);font-size:.5rem;color:var(--text3);text-align:center;padding:4px;border-top:1px solid var(--border);flex-shrink:0}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#0d0d0d;padding:10px 20px;border-radius:8px;font-family:var(--mono);font-size:.75rem;font-weight:700;z-index:200;pointer-events:none}
+.status-line{font-family:var(--mono);font-size:.55rem;color:var(--text3);text-align:center;padding:4px;border-top:1px solid var(--border);flex-shrink:0}
+.app-wrap{display:flex;flex-direction:column;height:100%}
+.app-wrap.hidden{display:none}
+.other-input{display:none;margin-top:6px}
+.other-input.show{display:block}
 </style>
 </head>
 <body>
-<div class="header"><div class="header-left"><div class="sdot"></div><div><div class="logo">СФЕРА HR</div><div class="logo-sub">АЭРОМАР</div></div></div><span class="htime" id="clock">--:--:--</span></div>
-<div class="tabs">
-<button class="tab active" data-p="dash">ДЭШБОРД</button>
-<button class="tab" data-p="recruit">ПОДБОР</button>
-<button class="tab" data-p="staff">ШТАТ</button>
-<button class="tab" data-p="siz">СИЗ</button>
-<button class="tab" data-p="hostel">ОБЩЕЖИТИЕ</button>
-<button class="tab" data-p="schedule">ТАБЕЛЬ</button>
+<div class="login-screen" id="loginScreen">
+<div style="text-align:center"><div class="login-logo">СФЕРА HR</div><div class="login-sub">АЭРОМАР · АВТОРИЗАЦИЯ</div></div>
+<div class="pin-dots" id="pinDots"><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div></div>
+<div class="login-error" id="loginErr"></div>
+<div class="pin-pad" id="pinPad">
+<div class="pin-key" data-k="1">1</div><div class="pin-key" data-k="2">2</div><div class="pin-key" data-k="3">3</div>
+<div class="pin-key" data-k="4">4</div><div class="pin-key" data-k="5">5</div><div class="pin-key" data-k="6">6</div>
+<div class="pin-key" data-k="7">7</div><div class="pin-key" data-k="8">8</div><div class="pin-key" data-k="9">9</div>
+<div class="pin-key empty"></div><div class="pin-key" data-k="0">0</div><div class="pin-key del" data-k="del">⌫</div>
 </div>
+</div>
+<div class="app-wrap hidden" id="appWrap">
+<div class="header"><div class="header-left"><div class="sdot"></div><div><div class="logo">СФЕРА HR</div><div class="logo-sub">АЭРОМАР</div></div></div><div class="header-right"><span class="role-badge" id="roleBadge">—</span><span class="htime" id="clock">--:--</span><button class="logout-btn" id="logoutBtn">⏻</button></div></div>
+<div class="tabs" id="tabsBar"></div>
 <div class="content" id="app"></div>
-<div class="status-line" id="sline">СФЕРА HR v1.0</div>
+<div class="status-line">СФЕРА HR v2.1 · Аэромар</div>
+</div>
 <div class="modal-overlay" id="mo"><div class="modal" id="mb"></div></div>
 <script>
-const K='sfera_hr_data';let DB=load();
-function def(){return{candidates:[
-{id:'c1',fio:'Иванов Пётр Сергеевич',pos:'Повар',age:35,status:'check',date:'2026-05-20',phone:'+7-999-111-22-33',dept:'Производство'},
-{id:'c2',fio:'Смирнова Анна Викторовна',pos:'Упаковщик',age:28,status:'med',date:'2026-05-19',phone:'+7-999-222-33-44',dept:'Производство'},
-{id:'c3',fio:'Козлов Дмитрий Алексеевич',pos:'Водитель',age:42,status:'ready',date:'2026-05-18',phone:'+7-999-333-44-55',dept:'Доставка'},
-{id:'c4',fio:'Морозова Елена Игоревна',pos:'Мойщица',age:31,status:'new',date:'2026-05-21',dept:'Уборка'},
-{id:'c5',fio:'Тимофеев Руслан Олегович',pos:'Экспедитор',age:26,status:'new',date:'2026-05-22',dept:'Доставка'}],
+const POSITIONS=[
+{id:'kompl',name:'Комплектовщик бортового питания',rate:325,rateReturn:335,count:15,dept:'Производство'},
+{id:'moy',name:'Оператор моечной установки',rate:315,rateReturn:0,count:15,dept:'Мойка'},
+{id:'ubor',name:'Уборщик помещений',rate:310,rateReturn:0,count:15,dept:'Уборка'},
+{id:'gruz',name:'Грузчик',rate:340,rateReturn:0,count:5,dept:'Склад'},
+{id:'other',name:'Другое…',rate:0,rateReturn:0,count:0,dept:''}
+];
+const DEPTS=['Производство','Мойка','Уборка','Склад'];
+const REJECT_REASONS=['Не прошёл СБ','Не прошёл медосмотр','Не явился на собеседование','Отказался от условий','Не подошёл по возрасту','Уволен за нарушение','Другое…'];
+const HOSTEL_RATE=300; // руб/сут
+const SHIFT_HOURS=11;
+const VAHTA_DAYS=45;
+
+const ROLES={
+hr:{pin:'1111',label:'HR-менеджер',tabs:['dash','recruit','staff','siz','hostel','rejects'],write:['recruit','siz','hostel','rejects']},
+brigadir:{pin:'2222',label:'Бригадир',tabs:['dash','staff','hostel','schedule'],write:['schedule']},
+manager:{pin:'3333',label:'Менеджер проекта',tabs:['dash','recruit','staff','siz','hostel','schedule','rejects'],write:['recruit','staff','siz','hostel','schedule','rejects']},
+chief:{pin:'4444',label:'Руководитель',tabs:['dash','recruit','staff','siz','hostel','schedule','rejects'],write:['recruit','rejects']},
+finance:{pin:'5555',label:'Бухгалтерия',tabs:['dash','schedule'],write:[]},
+admin:{pin:'0000',label:'Админ',tabs:['dash','recruit','staff','siz','hostel','schedule','rejects'],write:['dash','recruit','staff','siz','hostel','schedule','rejects']}
+};
+const TL={dash:'ДЭШБОРД',recruit:'ПОДБОР',staff:'ШТАТ',siz:'СИЗ',hostel:'ОБЩЕЖИТИЕ',schedule:'ТАБЕЛЬ',rejects:'ОТКАЗЫ'};
+let curRole=null,curPin='',cp='dash';
+
+function updateDots(){document.querySelectorAll('#pinDots .pin-dot').forEach((d,i)=>{d.classList.toggle('filled',i<curPin.length);d.classList.remove('error');});}
+function pinError(){document.querySelectorAll('#pinDots .pin-dot').forEach(d=>{d.classList.add('error');d.classList.remove('filled');});document.getElementById('loginErr').textContent='Неверный PIN';setTimeout(()=>{curPin='';updateDots();document.getElementById('loginErr').textContent='';},800);}
+function checkPin(){const found=Object.entries(ROLES).find(([k,v])=>v.pin===curPin);if(found){curRole=found[0];enterApp();}else{pinError();}}
+document.getElementById('pinPad').addEventListener('click',function(e){const k=e.target.closest('[data-k]');if(!k)return;const v=k.dataset.k;if(v==='del'){curPin=curPin.slice(0,-1);updateDots();return;}if(curPin.length>=4)return;curPin+=v;updateDots();if(curPin.length===4)setTimeout(checkPin,200);});
+function enterApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('appWrap').classList.remove('hidden');document.getElementById('roleBadge').textContent=ROLES[curRole].label;buildTabs();cp=ROLES[curRole].tabs[0];sp(cp);}
+function logout(){curRole=null;curPin='';document.getElementById('loginScreen').classList.remove('hidden');document.getElementById('appWrap').classList.add('hidden');updateDots();}
+document.getElementById('logoutBtn').addEventListener('click',logout);
+
+let DB={candidates:[
+{id:'c1',fio:'Иванов Пётр Сергеевич',pos:'kompl',age:35,status:'check',date:'2026-05-20',phone:'+7-999-111-22-33'},
+{id:'c2',fio:'Смирнова Анна Викторовна',pos:'moy',age:28,status:'med',date:'2026-05-19',phone:'+7-999-222-33-44'},
+{id:'c3',fio:'Козлов Дмитрий Алексеевич',pos:'gruz',age:42,status:'ready',date:'2026-05-18',phone:'+7-999-333-44-55'},
+{id:'c4',fio:'Морозова Елена Игоревна',pos:'ubor',age:31,status:'new',date:'2026-05-21',phone:''},
+{id:'c5',fio:'Тимофеев Руслан Олегович',pos:'kompl',age:26,status:'new',date:'2026-05-22',phone:''}],
 employees:[
-{id:'e1',fio:'Абрамов Виктор Иванович',pos:'Повар',dept:'Производство',shift:'А',status:'on',hired:'2024-03-15'},
-{id:'e2',fio:'Белова Наталья Сергеевна',pos:'Упаковщик',dept:'Производство',shift:'Б',status:'off',hired:'2023-09-01'},
-{id:'e3',fio:'Волков Андрей Петрович',pos:'Водитель',dept:'Доставка',shift:'А',status:'on',hired:'2022-06-10'},
-{id:'e4',fio:'Григорьева Екатерина Дмитриевна',pos:'Мойщица',dept:'Уборка',shift:'Б',status:'sick',hired:'2025-01-20'},
-{id:'e5',fio:'Давыдов Кирилл Романович',pos:'Экспедитор',dept:'Доставка',shift:'А',status:'on',hired:'2024-11-05'}],
+{id:'e1',fio:'Абрамов Виктор Иванович',pos:'kompl',shift:'А',status:'on',hired:'2024-03-15',hostelRate:300},
+{id:'e2',fio:'Белова Наталья Сергеевна',pos:'moy',shift:'Б',status:'off',hired:'2023-09-01',hostelRate:300},
+{id:'e3',fio:'Волков Андрей Петрович',pos:'gruz',shift:'А',status:'on',hired:'2022-06-10',hostelRate:300},
+{id:'e4',fio:'Григорьева Екатерина Дмитриевна',pos:'ubor',shift:'Б',status:'sick',hired:'2025-01-20',hostelRate:300},
+{id:'e5',fio:'Давыдов Кирилл Романович',pos:'kompl',shift:'А',status:'on',hired:'2024-11-05',hostelRate:300}],
+rejects:[
+{id:'rj1',fio:'Петухов Сергей Николаевич',pos:'kompl',reason:'Не прошёл СБ',stage:'check',date:'2026-05-10',canRecall:false},
+{id:'rj2',fio:'Сидорова Марина Павловна',pos:'moy',reason:'Не прошла медосмотр',stage:'med',date:'2026-05-12',canRecall:true}],
 siz:[
 {id:'s1',eid:'e1',item:'Куртка утеплённая',exp:'2026-05-15',st:'expired'},
 {id:'s2',eid:'e2',item:'Перчатки х/б',exp:'2026-05-18',st:'expired'},
 {id:'s3',eid:'e3',item:'Ботинки защитные',exp:'2026-05-20',st:'expired'},
 {id:'s4',eid:'e4',item:'Халат рабочий',exp:'2026-06-01',st:'soon'},
 {id:'s5',eid:'e5',item:'Каска защитная',exp:'2026-06-08',st:'soon'},
-{id:'s6',eid:'e1',item:'Фартук',exp:'2027-01-10',st:'ok'},
-{id:'s7',eid:'e2',item:'Халат рабочий',exp:'2027-03-01',st:'ok'}],
+{id:'s6',eid:'e1',item:'Фартук',exp:'2027-01-10',st:'ok'}],
 rooms:[
-{id:'r1',name:'К.101',bld:'Корпус 1',beds:[{n:'АВ',e:'e1'},{n:'КР',e:null},{n:'МД',e:'e3'},{n:null,e:null}]},
-{id:'r2',name:'К.102',bld:'Корпус 1',beds:[{n:'ПС',e:'e2'},{n:'ВИ',e:'e5'},{n:'НА',e:'e4'},{n:'ТЕ',e:null}]},
-{id:'r3',name:'К.201',bld:'Корпус 2',beds:[{n:'РА',e:null},{n:null,e:null},{n:null,e:null},{n:null,e:null}]}],
-transfers:[{r:'Маршрут А',d:'Общежитие → Шереметьево',t:'06:00'},{r:'Маршрут Б',d:'Шереметьево → Общежитие',t:'18:30'},{r:'Маршрут В',d:'Ночная смена',t:'22:00'}],
-depts:{'Производство':1240,'Доставка':380,'Уборка':290,'Склад':185,'Администрация':142,'Транспорт':120,'Техслужба':130}}}
-function load(){try{const s=JSON.parse(localStorage.getItem(K));return s&&s.candidates?s:def();}catch{return def();}}
-function save(){try{localStorage.setItem(K,JSON.stringify(DB));}catch{}}
+{id:'r1',name:'К.101',bld:'Корпус 1',rate:300,beds:[{n:'АВ',e:'e1'},{n:null,e:null},{n:'ВА',e:'e3'},{n:null,e:null}]},
+{id:'r2',name:'К.102',bld:'Корпус 1',rate:300,beds:[{n:'БН',e:'e2'},{n:'ДК',e:'e5'},{n:'ГЕ',e:'e4'},{n:null,e:null}]},
+{id:'r3',name:'К.201',bld:'Корпус 2',rate:300,beds:[{n:null,e:null},{n:null,e:null},{n:null,e:null},{n:null,e:null}]}],
+transfers:[{r:'Маршрут А',d:'Общежитие → Шереметьево',t:'06:00'},{r:'Маршрут Б',d:'Шереметьево → Общежитие',t:'18:30'}]};
+
 function $(s){return document.querySelector(s)}
 function $$(s){return document.querySelectorAll(s)}
 function ini(f){return f.split(' ').map(w=>w[0]).slice(0,2).join('')}
@@ -131,91 +190,115 @@ function uid(){return 'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,6)
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2000);}
 function fd(d){if(!d)return'—';const p=d.split('-');return p[2]+'.'+p[1];}
 function en(id){const e=DB.employees.find(x=>x.id===id);return e?e.fio:'—';}
-const CS={new:{l:'Отклик',c:'bgray'},check:{l:'Проверка',c:'bb'},med:{l:'Медосмотр',c:'bo'},docs:{l:'Оформление',c:'bg'},ready:{l:'Готов',c:'bg'},hired:{l:'Вышел',c:'bg'},reject:{l:'Отказ',c:'br'}};
+function pn(pid){const p=POSITIONS.find(x=>x.id===pid);return p?p.name:pid;}
+function pr(pid){const p=POSITIONS.find(x=>x.id===pid);return p?p.rate:0;}
+function pd(pid){const p=POSITIONS.find(x=>x.id===pid);return p?p.dept:'—';}
+function canWrite(tab){return curRole?ROLES[curRole].write.includes(tab):false;}
+function canSee(tab){return curRole?ROLES[curRole].tabs.includes(tab):false;}
+function posOpts(sel){return POSITIONS.map(p=>'<option value="'+p.id+'"'+(sel===p.id?' selected':'')+'>'+p.name+(p.rate?' ('+p.rate+' ₽/ч)':'')+'</option>').join('');}
+function deptOpts(sel){return DEPTS.map(d=>'<option'+(sel===d?' selected':'')+'>'+d+'</option>').join('')+'<option>Другое…</option>';}
+function rejectOpts(){return REJECT_REASONS.map(r=>'<option>'+r+'</option>').join('');}
+
+const CS={new:{l:'Отклик',c:'bgray'},check:{l:'Проверка СБ',c:'bb'},interview_brig:{l:'Собес. бригадир',c:'bo'},med:{l:'Медосмотр',c:'bo'},docs:{l:'Оформление',c:'bg'},ready:{l:'Готов',c:'bg'},hired:{l:'Вышел',c:'bg'},reject:{l:'Отказ',c:'br'}};
 const ES={on:{l:'На смене',c:'bg'},off:{l:'Выходной',c:'bgray'},sick:{l:'Больничный',c:'bo'},vacation:{l:'Отпуск',c:'bb'}};
-let cp='dash';
-function sp(id){cp=id;$$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.p===id));render();}
-function render(){$('#app').innerHTML='<div class="page active" style="position:relative;display:block">'+P[cp]()+'</div>';bindE();}
+
+function buildTabs(){$('#tabsBar').innerHTML=ROLES[curRole].tabs.map(t=>'<button class="tab" data-p="'+t+'">'+TL[t]+'</button>').join('');$('#tabsBar').querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>sp(t.dataset.p)));}
+function sp(id){if(!canSee(id))return;cp=id;$$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.p===id));render();}
+function render(){$('#app').innerHTML='<div class="page">'+P[cp]()+'</div>';$('#app').scrollTop=0;bindE();}
+function roBanner(tab){return canWrite(tab)?'':'<div class="readonly-banner">🔒 РЕЖИМ ПРОСМОТРА</div>';}
+
 const P={
 dash(){
-const te=Object.values(DB.depts).reduce((a,b)=>a+b,0);
 const cn=DB.candidates.filter(c=>c.status!=='hired'&&c.status!=='reject').length;
 const se=DB.siz.filter(s=>s.st==='expired').length;
 const fb=DB.rooms.reduce((a,r)=>a+r.beds.filter(b=>!b.e).length,0);
+const te=DB.employees.length;
 const al=[];
 if(se)al.push({t:'red',i:'🔴',x:'СИЗ просрочен у <b>'+se+'</b> сотрудников'});
 const nc=DB.candidates.filter(c=>c.status==='new').length;
 if(nc)al.push({t:'orange',i:'🟠',x:'<b>'+nc+'</b> новых откликов ждут обработки'});
-return`<div class="mgrid">
-<div class="metric" data-go="staff"><div class="micon">👥</div><span class="mval">${te}</span><div class="mlabel">В штате</div></div>
-<div class="metric" data-go="recruit"><div class="micon">🔍</div><span class="mval gold">${cn}</span><div class="mlabel">Кандидаты</div></div>
-<div class="metric" data-go="siz"><div class="micon">🦺</div><span class="mval ${se?'red':''}">${se}</span><div class="mlabel">СИЗ просрочен</div></div>
-<div class="metric" data-go="hostel"><div class="micon">🏠</div><span class="mval">${fb}</span><div class="mlabel">Койки свободны</div></div>
-</div>
-<div class="actions">
-<div class="action-btn" data-a="addC"><div class="action-icon">📋</div><div class="action-label">Новый кандидат</div></div>
-<div class="action-btn" data-a="addS"><div class="action-icon">🦺</div><div class="action-label">Выдать СИЗ</div></div>
-<div class="action-btn" data-go="hostel"><div class="action-icon">🛏️</div><div class="action-label">Заселить</div></div>
-<div class="action-btn" data-go="schedule"><div class="action-icon">📊</div><div class="action-label">Табель</div></div>
-</div>
-${al.length?'<div class="card"><div class="ctitle">⚡ Срочное</div>'+al.map(a=>'<div class="alert alert-'+a.t+'"><span>'+a.i+'</span><div>'+a.x+'</div></div>').join('')+'</div>':''}
-<div class="card"><div class="ctitle">👤 Последние кандидаты</div>${DB.candidates.slice(0,4).map(c=>'<div class="cand" data-a="viewC" data-id="'+c.id+'"><div class="cand-ava">'+ini(c.fio)+'</div><div class="cand-info"><div class="cand-name">'+c.fio+'</div><div class="cand-meta">'+c.pos+' · '+c.dept+'</div></div><span class="badge '+(CS[c.status]||{c:'bgray'}).c+'">'+(CS[c.status]||{l:c.status}).l+'</span></div>').join('')}</div>`;},
+
+let mg='<div class="mgrid"><div class="metric"'+(canSee('staff')?' data-go="staff"':'')+'><div class="micon">👥</div><span class="mval">'+te+'</span><div class="mlabel">В штате</div></div>';
+if(canSee('recruit'))mg+='<div class="metric" data-go="recruit"><div class="micon">🔍</div><span class="mval gold">'+cn+'</span><div class="mlabel">Кандидаты</div></div>';
+if(canSee('siz'))mg+='<div class="metric" data-go="siz"><div class="micon">🦺</div><span class="mval '+(se?'red':'')+'">'+se+'</span><div class="mlabel">СИЗ просроч.</div></div>';
+if(canSee('hostel'))mg+='<div class="metric" data-go="hostel"><div class="micon">🏠</div><span class="mval">'+fb+'</span><div class="mlabel">Койки</div></div>';
+mg+='</div>';
+
+// Заявка по должностям
+let posHtml='<div class="card"><div class="ctitle">📋 Заявка Аэромар · 50 вакансий</div>';
+POSITIONS.filter(p=>p.count>0).forEach(p=>{
+const filled=DB.employees.filter(e=>e.pos===p.id).length;
+posHtml+='<div class="sitem"><div><div class="sname">'+p.name+'</div><div class="sname-sub">'+p.rate+' ₽/ч · '+p.dept+'</div></div><span class="badge '+(filled>=p.count?'bg':'bo')+'">'+filled+'/'+p.count+'</span></div>';
+});
+posHtml+='</div>';
+
+let fin='';if(curRole==='finance'||curRole==='admin'||curRole==='chief'){
+const hostelCost=DB.employees.length*HOSTEL_RATE*VAHTA_DAYS;
+fin='<div class="card"><div class="ctitle">💰 Финансы (демо)</div><div class="sitem"><span class="sname">Общежитие/мес</span><span class="badge bo">'+Math.round(hostelCost/1000)+'К ₽</span></div><div class="sitem"><span class="sname">Ставка общежития</span><span class="badge bg">'+HOSTEL_RATE+' ₽/сут</span></div></div>';}
+
+let act='';if(canWrite('recruit')||canWrite('siz')){act='<div class="actions">';if(canWrite('recruit'))act+='<div class="action-btn" data-a="addC"><div class="action-icon">📋</div><div class="action-label">Новый кандидат</div></div>';if(canWrite('siz'))act+='<div class="action-btn" data-a="addS"><div class="action-icon">🦺</div><div class="action-label">Выдать СИЗ</div></div>';act+='</div>';}
+
+return mg+posHtml+act+(al.length?'<div class="card"><div class="ctitle">⚡ Срочное</div>'+al.map(a=>'<div class="alert alert-'+a.t+'"><span>'+a.i+'</span><div>'+a.x+'</div></div>').join('')+'</div>':'')+fin;
+},
+
 recruit(){
 const bs={};DB.candidates.forEach(c=>{bs[c.status]=(bs[c.status]||0)+1;});const tot=DB.candidates.length||1;
-const st=[{k:'new',l:'Отклик',bg:'var(--blue-bg)',br:'var(--blue)'},{k:'check',l:'Проверка СБ',bg:'var(--orange-bg)',br:'var(--orange)'},{k:'med',l:'Медосмотр',bg:'#1a1a05',br:'var(--gold)'},{k:'docs',l:'Оформление',bg:'var(--green-bg)',br:'var(--green)'},{k:'ready',l:'Готов',bg:'var(--accent)',br:'var(--accent)'}];
-return`<div class="card"><div class="ctitle">📈 Воронка</div><div class="funnel">${st.map(s=>{const n=bs[s.k]||0;return'<div class="funnel-row"><span class="funnel-count">'+n+'</span><div class="funnel-bar" style="width:'+Math.max(8,n/tot*100)+'%;background:'+s.bg+';border:1px solid '+s.br+'">'+s.l+'</div></div>';}).join('')}</div></div>
-<div class="action-btn" data-a="addC" style="margin-bottom:10px;text-align:center"><div class="action-icon">➕</div><div class="action-label">Добавить кандидата</div></div>
-<div class="card"><div class="ctitle">👤 Все (${DB.candidates.length})</div>${DB.candidates.map(c=>'<div class="cand" data-a="viewC" data-id="'+c.id+'"><div class="cand-ava">'+ini(c.fio)+'</div><div class="cand-info"><div class="cand-name">'+c.fio+'</div><div class="cand-meta">'+c.pos+' · '+c.age+' лет · с '+fd(c.date)+'</div></div><span class="badge '+(CS[c.status]||{c:'bgray'}).c+'">'+(CS[c.status]||{l:c.status}).l+'</span></div>').join('')}</div>`;},
-staff(){return`<div class="card"><div class="ctitle">📊 По отделам</div>${Object.entries(DB.depts).map(([d,n])=>'<div class="sitem"><span class="sname">'+d+'</span><span class="badge bg">'+n+'</span></div>').join('')}</div>
-<div class="card"><div class="ctitle">🔍 Сотрудники (${DB.employees.length})</div>${DB.employees.map(e=>'<div class="sitem"><div><div class="sname">'+e.fio+'</div><div class="sname-sub">'+e.pos+' · '+e.dept+' · Смена '+e.shift+'</div></div><span class="badge '+(ES[e.status]||{c:'bgray'}).c+'">'+(ES[e.status]||{l:e.status}).l+'</span></div>').join('')}</div>`;},
+const st=[{k:'new',l:'Отклик',bg:'var(--blue-bg)',br:'var(--blue)'},{k:'check',l:'Проверка СБ',bg:'var(--orange-bg)',br:'var(--orange)'},{k:'interview_brig',l:'Собес. бригадир',bg:'#1a1510',br:'var(--gold)'},{k:'med',l:'Медосмотр',bg:'#1a1a05',br:'var(--gold)'},{k:'docs',l:'Оформление',bg:'var(--green-bg)',br:'var(--green)'},{k:'ready',l:'Готов',bg:'var(--accent)',br:'var(--accent)'}];
+const mx=Math.max(...st.map(s=>bs[s.k]||0),1);
+let fc=DB.candidates;if(curRole==='brigadir'){const bs2=['interview_brig','med','docs','ready','hired','reject'];fc=DB.candidates.filter(c=>bs2.includes(c.status));}
+return roBanner('recruit')+'<div class="card"><div class="ctitle">📈 Воронка</div><div class="funnel">'+st.map(s=>{const n=bs[s.k]||0;return'<div class="funnel-row"><span class="funnel-count">'+n+'</span><div class="funnel-bar" style="width:'+Math.max(30,n/mx*100)+'%;background:'+s.bg+';border:1px solid '+s.br+'">'+s.l+'</div></div>';}).join('')+'</div></div>'+(canWrite('recruit')?'<div class="action-btn" data-a="addC" style="margin-bottom:10px;text-align:center"><div class="action-icon">➕</div><div class="action-label">Добавить кандидата</div></div>':'')+'<div class="card"><div class="ctitle">👤 Все ('+fc.length+')</div>'+fc.map(c=>'<div class="cand" data-a="viewC" data-id="'+c.id+'"><div class="cand-ava">'+ini(c.fio)+'</div><div class="cand-info"><div class="cand-name">'+c.fio+'</div><div class="cand-meta">'+pn(c.pos)+' · '+pr(c.pos)+' ₽/ч · с '+fd(c.date)+'</div></div><span class="badge '+(CS[c.status]||{c:'bgray'}).c+'">'+(CS[c.status]||{l:c.status}).l+'</span></div>').join('')+'</div>';
+},
+
+staff(){
+return roBanner('staff')+'<div class="card"><div class="ctitle">📊 По должностям</div>'+POSITIONS.filter(p=>p.count>0).map(p=>{const n=DB.employees.filter(e=>e.pos===p.id).length;return'<div class="sitem"><div><div class="sname">'+p.name+'</div><div class="sname-sub">'+p.rate+' ₽/ч · '+p.dept+'</div></div><span class="badge '+(n>=p.count?'bg':'bo')+'">'+n+'/'+p.count+'</span></div>';}).join('')+'</div><div class="card"><div class="ctitle">🔍 Сотрудники ('+DB.employees.length+')</div>'+DB.employees.map(e=>'<div class="sitem"><div><div class="sname">'+e.fio+'</div><div class="sname-sub">'+pn(e.pos)+' · '+pr(e.pos)+' ₽/ч · Смена '+e.shift+'</div></div><span class="badge '+(ES[e.status]||{c:'bgray'}).c+'">'+(ES[e.status]||{l:e.status}).l+'</span></div>').join('')+'</div>';
+},
+
 siz(){const ex=DB.siz.filter(s=>s.st==='expired'),so=DB.siz.filter(s=>s.st==='soon'),ok=DB.siz.filter(s=>s.st==='ok');
-return`<div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">${DB.siz.length}</span><div class="mlabel">Выдано</div></div><div class="metric"><span class="mval red">${ex.length}</span><div class="mlabel">Просрочено</div></div><div class="metric"><span class="mval orange">${so.length}</span><div class="mlabel">Замена 30д</div></div></div>
-<div class="action-btn" data-a="addS" style="margin-bottom:10px;text-align:center"><div class="action-icon">➕</div><div class="action-label">Выдать СИЗ</div></div>
-${ex.length?'<div class="card"><div class="ctitle">🔴 Просроченные</div>'+ex.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge br">истёк '+fd(s.exp)+'</span></div>').join('')+'</div>':''}
-${so.length?'<div class="card"><div class="ctitle">🟠 Скоро</div>'+so.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge bo">'+fd(s.exp)+'</span></div>').join('')+'</div>':''}
-${ok.length?'<div class="card"><div class="ctitle">✅ Норма</div>'+ok.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge bg">до '+fd(s.exp)+'</span></div>').join('')+'</div>':''}`;},
-hostel(){const blds={};DB.rooms.forEach(r=>{if(!blds[r.bld])blds[r.bld]=[];blds[r.bld].push(r);});
-const fb=DB.rooms.reduce((a,r)=>a+r.beds.filter(b=>!b.e).length,0),tb=DB.rooms.reduce((a,r)=>a+r.beds.length,0);
-return`<div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">${tb}</span><div class="mlabel">Всего</div></div><div class="metric"><span class="mval">${tb-fb}</span><div class="mlabel">Заселено</div></div><div class="metric"><span class="mval" style="color:var(--green)">${fb}</span><div class="mlabel">Свободно</div></div></div>
-${Object.entries(blds).map(([b,rs])=>'<div class="card"><div class="ctitle">🏠 '+b+'</div>'+rs.map(r=>{const tk=r.beds.filter(b=>b.e).length;return'<div class="room"><div class="room-header"><span class="room-name">'+r.name+'</span><span class="badge '+(tk===r.beds.length?'bg':'bo')+'">'+tk+'/'+r.beds.length+'</span></div><div class="room-beds">'+r.beds.map((bed,i)=>bed.e?'<div class="bed bed-taken">'+(bed.n||'??')+'</div>':'<div class="bed bed-free" data-a="assignB" data-r="'+r.id+'" data-b="'+i+'">—</div>').join('')+'</div></div>';}).join('')+'</div>').join('')}
-<div class="card"><div class="ctitle">🚐 Трансфер</div>${DB.transfers.map(t=>'<div class="sitem"><span class="sname">'+t.r+'<span class="sname-sub" style="display:block">'+t.d+'</span></span><span class="badge bg">'+t.t+'</span></div>').join('')}</div>`;},
+return roBanner('siz')+'<div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">'+DB.siz.length+'</span><div class="mlabel">Выдано</div></div><div class="metric"><span class="mval red">'+ex.length+'</span><div class="mlabel">Просрочено</div></div><div class="metric"><span class="mval orange">'+so.length+'</span><div class="mlabel">Замена 30д</div></div></div>'+(canWrite('siz')?'<div class="action-btn" data-a="addS" style="margin-bottom:10px;text-align:center"><div class="action-icon">➕</div><div class="action-label">Выдать СИЗ</div></div>':'')+(ex.length?'<div class="card"><div class="ctitle">🔴 Просроченные</div>'+ex.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge br">истёк '+fd(s.exp)+'</span></div>').join('')+'</div>':'')+(so.length?'<div class="card"><div class="ctitle">🟠 Скоро</div>'+so.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge bo">'+fd(s.exp)+'</span></div>').join('')+'</div>':'')+(ok.length?'<div class="card"><div class="ctitle">✅ Норма</div>'+ok.map(s=>'<div class="sitem"><div><div class="sname">'+en(s.eid)+'</div><div class="sname-sub">'+s.item+'</div></div><span class="badge bg">до '+fd(s.exp)+'</span></div>').join('')+'</div>':'');
+},
+
+hostel(){const blds={};DB.rooms.forEach(r=>{if(!blds[r.bld])blds[r.bld]=[];blds[r.bld].push(r);});const fb=DB.rooms.reduce((a,r)=>a+r.beds.filter(b=>!b.e).length,0),tb=DB.rooms.reduce((a,r)=>a+r.beds.length,0);
+return roBanner('hostel')+'<div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">'+tb+'</span><div class="mlabel">Всего</div></div><div class="metric"><span class="mval">'+(tb-fb)+'</span><div class="mlabel">Заселено</div></div><div class="metric"><span class="mval" style="color:var(--green)">'+fb+'</span><div class="mlabel">Свободно</div></div></div><div class="card"><div class="ctitle">💰 Стоимость: '+HOSTEL_RATE+' ₽/сут на человека</div></div>'+Object.entries(blds).map(([b,rs])=>'<div class="card"><div class="ctitle">🏠 '+b+'</div>'+rs.map(r=>{const tk=r.beds.filter(b=>b.e).length;return'<div class="room"><div class="room-header"><span class="room-name">'+r.name+' <span style="color:var(--text2);font-weight:400">'+r.rate+' ₽/сут</span></span><span class="badge '+(tk===r.beds.length?'bg':'bo')+'">'+tk+'/'+r.beds.length+'</span></div><div class="room-beds">'+r.beds.map((bed,i)=>bed.e?'<div class="bed bed-taken">'+(bed.n||'??')+'</div>':(canWrite('hostel')?'<div class="bed bed-free" data-a="assignB" data-r="'+r.id+'" data-b="'+i+'">—</div>':'<div class="bed bed-free">—</div>')).join('')+'</div></div>';}).join('')+'</div>').join('')+'<div class="card"><div class="ctitle">🚐 Трансфер</div>'+DB.transfers.map(t=>'<div class="sitem"><span class="sname">'+t.r+'<span class="sname-sub" style="display:block">'+t.d+'</span></span><span class="badge bg">'+t.t+'</span></div>').join('')+'</div>';
+},
+
 schedule(){const on=DB.employees.filter(e=>e.status==='on'),sk=DB.employees.filter(e=>e.status==='sick'),vc=DB.employees.filter(e=>e.status==='vacation'),of=DB.employees.filter(e=>e.status==='off');
-return`<div class="card"><div class="ctitle">📅 Сегодня</div><div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">${on.length}</span><div class="mlabel">На смене</div></div><div class="metric"><span class="mval gold">${vc.length}</span><div class="mlabel">Отпуск</div></div><div class="metric"><span class="mval orange">${sk.length}</span><div class="mlabel">Больничный</div></div></div></div>
-<div class="card"><div class="ctitle">📊 Смены</div>
-<div class="sitem"><span class="sname">Смена А<span class="sname-sub" style="display:block">06:00–18:00</span></span><span class="badge bg">${DB.employees.filter(e=>e.shift==='А'&&e.status==='on').length}</span></div>
-<div class="sitem"><span class="sname">Смена Б<span class="sname-sub" style="display:block">18:00–06:00</span></span><span class="badge bb">${DB.employees.filter(e=>e.shift==='Б'&&e.status==='on').length}</span></div>
-<div class="sitem"><span class="sname">Выходные</span><span class="badge bgray">${of.length}</span></div></div>
-<div class="card"><div class="ctitle">🤒 Больничные</div>${sk.length?sk.map(e=>'<div class="sitem"><span class="sname">'+e.fio+'<span class="sname-sub" style="display:block">'+e.pos+'</span></span><span class="badge bo">больничный</span></div>').join(''):'<div style="font-family:var(--mono);font-size:.65rem;color:var(--text3);padding:10px;text-align:center">Нет больничных 👍</div>'}</div>`;}
+return roBanner('schedule')+'<div class="card"><div class="ctitle">📅 Сегодня</div><div class="mgrid" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span class="mval">'+on.length+'</span><div class="mlabel">На смене</div></div><div class="metric"><span class="mval gold">'+vc.length+'</span><div class="mlabel">Отпуск</div></div><div class="metric"><span class="mval orange">'+sk.length+'</span><div class="mlabel">Больничный</div></div></div></div><div class="card"><div class="ctitle">📊 Смены</div><div class="sitem"><span class="sname">Смена А<span class="sname-sub" style="display:block">06:00–18:00</span></span><span class="badge bg">'+DB.employees.filter(e=>e.shift==='А'&&e.status==='on').length+'</span></div><div class="sitem"><span class="sname">Смена Б<span class="sname-sub" style="display:block">18:00–06:00</span></span><span class="badge bb">'+DB.employees.filter(e=>e.shift==='Б'&&e.status==='on').length+'</span></div></div>'+(canWrite('schedule')?'<div class="action-btn" style="margin-bottom:10px;text-align:center" data-a="exportTab"><div class="action-icon">📤</div><div class="action-label">Выгрузить табель</div></div>':'');
+},
+
+rejects(){return roBanner('rejects')+'<div class="mgrid" style="grid-template-columns:repeat(2,1fr)"><div class="metric"><span class="mval red">'+DB.rejects.length+'</span><div class="mlabel">В базе отказов</div></div><div class="metric"><span class="mval gold">'+DB.rejects.filter(r=>r.canRecall).length+'</span><div class="mlabel">Можно вернуть</div></div></div><div class="card"><div class="ctitle">🚫 Не прошли / Уволены</div>'+(DB.rejects.length?DB.rejects.map(r=>'<div class="cand" data-a="viewR" data-id="'+r.id+'"><div class="cand-ava" style="background:var(--red-bg);color:var(--red)">'+ini(r.fio)+'</div><div class="cand-info"><div class="cand-name">'+r.fio+'</div><div class="cand-meta">'+pn(r.pos)+' · '+r.reason+'</div></div><span class="badge '+(r.canRecall?'bo':'br')+'">'+(r.canRecall?'можно вернуть':'закрыт')+'</span></div>').join(''):'<div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);padding:10px;text-align:center">База пуста</div>')+'</div>';}
 };
+
 function om(h){$('#mb').innerHTML=h;$('#mo').classList.add('open');}
 function cm(){$('#mo').classList.remove('open');}
-function mAddC(){const dp=Object.keys(DB.depts).map(d=>'<option>'+d+'</option>').join('');
-om('<div class="modal-title">➕ Новый кандидат</div><div class="form-group"><label class="form-label">ФИО</label><input class="form-input" id="ff" placeholder="Иванов Иван Иванович"></div><div class="form-row"><div class="form-group"><label class="form-label">Должность</label><input class="form-input" id="fp" placeholder="Повар"></div><div class="form-group"><label class="form-label">Возраст</label><input class="form-input" id="fa" type="number" placeholder="30"></div></div><div class="form-row"><div class="form-group"><label class="form-label">Отдел</label><select class="form-select" id="fd">'+dp+'</select></div><div class="form-group"><label class="form-label">Телефон</label><input class="form-input" id="fph" placeholder="+7-999-..."></div></div><button class="form-btn" id="bsc">ДОБАВИТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
-function mViewC(id){const c=DB.candidates.find(x=>x.id===id);if(!c)return;
-const sts=Object.entries(CS).map(([k,v])=>'<option value="'+k+'"'+(c.status===k?' selected':'')+'>'+v.l+'</option>').join('');
-om('<div class="modal-title">👤 '+c.fio+'</div><div style="font-family:var(--mono);font-size:.6rem;color:var(--text3);margin-bottom:12px">'+c.pos+' · '+c.dept+' · '+c.age+' лет</div><div class="form-group"><label class="form-label">Статус</label><select class="form-select" id="fs">'+sts+'</select></div><button class="form-btn" id="buc" data-id="'+c.id+'">ОБНОВИТЬ</button><button class="form-btn" style="background:var(--accent)" id="bhc" data-id="'+c.id+'">✅ ПРИНЯТЬ</button><button class="form-btn form-btn-danger" id="brc" data-id="'+c.id+'">ОТКАЗАТЬ</button><button class="form-btn form-btn-gray" id="bx">ЗАКРЫТЬ</button>');}
-function mAddS(){const eo=DB.employees.map(e=>'<option value="'+e.id+'">'+e.fio+'</option>').join('');
-om('<div class="modal-title">🦺 Выдать СИЗ</div><div class="form-group"><label class="form-label">Сотрудник</label><select class="form-select" id="fse">'+eo+'</select></div><div class="form-group"><label class="form-label">Наименование</label><input class="form-input" id="fsi" placeholder="Куртка утеплённая"></div><div class="form-row"><div class="form-group"><label class="form-label">Дата выдачи</label><input class="form-input" id="fsd" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div><div class="form-group"><label class="form-label">Срок годности</label><input class="form-input" id="fsx" type="date"></div></div><button class="form-btn" id="bss">ВЫДАТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
-function mAssignB(rid,bi){const eo=DB.employees.map(e=>'<option value="'+e.id+'">'+e.fio+'</option>').join('');
-om('<div class="modal-title">🛏️ Заселить</div><div class="form-group"><label class="form-label">Сотрудник</label><select class="form-select" id="fbe">'+eo+'</select></div><button class="form-btn" id="bsb" data-r="'+rid+'" data-b="'+bi+'">ЗАСЕЛИТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
-function bindE(){$$('[data-go]').forEach(el=>el.onclick=()=>sp(el.dataset.go));
-$$('[data-a]').forEach(el=>{el.onclick=()=>{const a=el.dataset.a;
-if(a==='addC')mAddC();else if(a==='viewC')mViewC(el.dataset.id);else if(a==='addS')mAddS();else if(a==='assignB')mAssignB(el.dataset.r,parseInt(el.dataset.b));}});}
+
+function mAddC(){om('<div class="modal-title">➕ Новый кандидат</div><div class="form-group"><label class="form-label">ФИО</label><input class="form-input" id="ff" placeholder="Фамилия Имя Отчество"></div><div class="form-group"><label class="form-label">Должность</label><select class="form-select" id="fp">'+posOpts('')+'</select><input class="form-input other-input" id="fpOther" placeholder="Введите должность"></div><div class="form-row"><div class="form-group"><label class="form-label">Возраст</label><input class="form-input" id="fa" type="number" placeholder="30"></div><div class="form-group"><label class="form-label">Телефон</label><input class="form-input" id="fph" placeholder="+7-999-..."></div></div><button class="form-btn" id="bsc">ДОБАВИТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');
+$('#fp').onchange=function(){$('#fpOther').classList.toggle('show',this.value==='other');};}
+
+function mViewC(id){const c=DB.candidates.find(x=>x.id===id);if(!c)return;const sts=Object.entries(CS).map(([k,v])=>'<option value="'+k+'"'+(c.status===k?' selected':'')+'>'+v.l+'</option>').join('');const w=canWrite('recruit');
+om('<div class="modal-title">👤 '+c.fio+'</div><div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);margin-bottom:12px">'+pn(c.pos)+' · '+pr(c.pos)+' ₽/ч · '+(c.age||'—')+' лет'+(c.phone?' · '+c.phone:'')+'<br>За вахту: ~'+(pr(c.pos)*SHIFT_HOURS*Math.round(VAHTA_DAYS*6/7)/1000).toFixed(0)+'К ₽</div>'+(w?'<div class="form-group"><label class="form-label">Статус</label><select class="form-select" id="fs">'+sts+'</select></div><button class="form-btn" id="buc" data-id="'+c.id+'">ОБНОВИТЬ СТАТУС</button><button class="form-btn" style="background:var(--accent)" id="bhc" data-id="'+c.id+'">✅ ПРИНЯТЬ В ШТАТ</button><div class="form-group"><label class="form-label">Причина отказа</label><select class="form-select" id="frr">'+rejectOpts()+'</select><input class="form-input other-input" id="frrOther" placeholder="Укажите причину"></div><button class="form-btn form-btn-danger" id="brc" data-id="'+c.id+'">ОТКАЗАТЬ → В БАЗУ</button>':'<div class="readonly-banner">🔒 Только просмотр</div>')+'<button class="form-btn form-btn-gray" id="bx">ЗАКРЫТЬ</button>');
+if(w&&$('#frr'))$('#frr').onchange=function(){$('#frrOther').classList.toggle('show',this.value==='Другое…');};}
+
+function mViewR(id){const r=DB.rejects.find(x=>x.id===id);if(!r)return;const w=curRole==='chief'||curRole==='admin';
+om('<div class="modal-title">🚫 '+r.fio+'</div><div style="font-family:var(--mono);font-size:.7rem;color:var(--text2);margin-bottom:12px">'+pn(r.pos)+' · Причина: '+r.reason+'<br>Этап: '+(CS[r.stage]||{l:r.stage}).l+' · '+fd(r.date)+'</div>'+(w&&r.canRecall?'<button class="form-btn" id="brecall" data-id="'+r.id+'">🔄 ВЕРНУТЬ В ПОДБОР</button>':'')+(r.canRecall?'<div style="font-family:var(--mono);font-size:.58rem;color:var(--gold);margin-bottom:8px;text-align:center">Незначительное отклонение — возможен возврат</div>':'')+'<button class="form-btn form-btn-gray" id="bx">ЗАКРЫТЬ</button>');}
+
+function mAddS(){const eo=DB.employees.map(e=>'<option value="'+e.id+'">'+e.fio+' ('+pn(e.pos)+')</option>').join('');om('<div class="modal-title">🦺 Выдать СИЗ</div><div class="form-group"><label class="form-label">Сотрудник</label><select class="form-select" id="fse">'+eo+'</select></div><div class="form-group"><label class="form-label">Наименование</label><input class="form-input" id="fsi" placeholder="Куртка утеплённая"></div><div class="form-row"><div class="form-group"><label class="form-label">Дата выдачи</label><input class="form-input" id="fsd" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div><div class="form-group"><label class="form-label">Срок годности</label><input class="form-input" id="fsx" type="date"></div></div><button class="form-btn" id="bss">ВЫДАТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
+
+function mAssignB(rid,bi){const eo=DB.employees.map(e=>'<option value="'+e.id+'">'+e.fio+'</option>').join('');om('<div class="modal-title">🛏️ Заселить</div><div class="form-group"><label class="form-label">Сотрудник</label><select class="form-select" id="fbe">'+eo+'</select></div><button class="form-btn" id="bsb" data-r="'+rid+'" data-b="'+bi+'">ЗАСЕЛИТЬ</button><button class="form-btn form-btn-gray" id="bx">ОТМЕНА</button>');}
+
+function bindE(){$$('[data-go]').forEach(el=>el.onclick=()=>{if(canSee(el.dataset.go))sp(el.dataset.go);});$$('[data-a]').forEach(el=>{el.onclick=()=>{const a=el.dataset.a;if(a==='addC'&&canWrite('recruit'))mAddC();else if(a==='viewC')mViewC(el.dataset.id);else if(a==='viewR')mViewR(el.dataset.id);else if(a==='addS'&&canWrite('siz'))mAddS();else if(a==='assignB'&&canWrite('hostel'))mAssignB(el.dataset.r,parseInt(el.dataset.b));else if(a==='exportTab')toast('Выгрузка табеля — в разработке');};});}
+
 document.addEventListener('click',function(e){const t=e.target;
 if(t.id==='bx')cm();
-if(t.id==='mo')cm();
-if(t.id==='bsc'){const f=$('#ff').value.trim();if(!f){toast('Введите ФИО');return;}DB.candidates.unshift({id:uid(),fio:f,pos:$('#fp').value||'—',age:parseInt($('#fa').value)||0,status:'new',date:new Date().toISOString().slice(0,10),phone:$('#fph').value||'',dept:$('#fd').value||'Производство'});save();cm();render();toast('Добавлен ✅');}
-if(t.id==='buc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){c.status=$('#fs').value;save();cm();render();toast('Обновлён ✅');}}
-if(t.id==='bhc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){c.status='hired';DB.employees.push({id:uid(),fio:c.fio,pos:c.pos,dept:c.dept,shift:'А',status:'on',hired:new Date().toISOString().slice(0,10)});save();cm();render();toast(c.fio+' принят 🎉');}}
-if(t.id==='brc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){c.status='reject';save();cm();render();toast('Отклонён');}}
-if(t.id==='bss'){const it=$('#fsi').value.trim();if(!it){toast('Введите наименование');return;}const ex=$('#fsx').value;let st='ok';if(ex){const d=new Date(ex),n=new Date();if(d<n)st='expired';else if((d-n)/(864e5)<30)st='soon';}DB.siz.push({id:uid(),eid:$('#fse').value,item:it,exp:ex,st});save();cm();render();toast('СИЗ выдан ✅');}
-if(t.id==='bsb'){const r=DB.rooms.find(x=>x.id===t.dataset.r);if(r){const emp=DB.employees.find(e=>e.id===$('#fbe').value);r.beds[parseInt(t.dataset.b)]={n:emp?ini(emp.fio):'??',e:emp?emp.id:null};save();cm();render();toast('Заселён ✅');}}
+if(t.id==='bsc'){const f=$('#ff').value.trim();if(!f){toast('Введите ФИО');return;}const inR=DB.rejects.find(r=>r.fio.toLowerCase()===f.toLowerCase());if(inR){toast('⚠️ В базе отказов: '+inR.reason);return;}let pos=$('#fp').value;if(pos==='other'){const ov=$('#fpOther').value.trim();if(!ov){toast('Введите должность');return;}}DB.candidates.unshift({id:uid(),fio:f,pos:pos,age:parseInt($('#fa').value)||0,status:'new',date:new Date().toISOString().slice(0,10),phone:$('#fph').value||''});cm();render();toast('Добавлен ✅');}
+if(t.id==='buc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){c.status=$('#fs').value;cm();render();toast('Статус обновлён ✅');}}
+if(t.id==='bhc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){c.status='hired';DB.employees.push({id:uid(),fio:c.fio,pos:c.pos,shift:'А',status:'on',hired:new Date().toISOString().slice(0,10),hostelRate:HOSTEL_RATE});cm();render();toast(c.fio+' принят 🎉');}}
+if(t.id==='brc'){const c=DB.candidates.find(x=>x.id===t.dataset.id);if(c){let reason=$('#frr').value;if(reason==='Другое…'){reason=$('#frrOther').value.trim();if(!reason){toast('Укажите причину');return;}}const prev=c.status;c.status='reject';DB.rejects.push({id:uid(),fio:c.fio,pos:c.pos,reason:reason,stage:prev,date:new Date().toISOString().slice(0,10),canRecall:true});cm();render();toast('В базу отказов');}}
+if(t.id==='brecall'){const r=DB.rejects.find(x=>x.id===t.dataset.id);if(r){DB.candidates.unshift({id:uid(),fio:r.fio,pos:r.pos,age:0,status:'new',date:new Date().toISOString().slice(0,10),phone:''});r.canRecall=false;r.reason+=' → возвращён';cm();render();toast(r.fio+' возвращён 🔄');}}
+if(t.id==='bss'){const it=$('#fsi').value.trim();if(!it){toast('Введите наименование');return;}const ex=$('#fsx').value;let st='ok';if(ex){const d=new Date(ex),n=new Date();if(d<n)st='expired';else if((d-n)/(864e5)<30)st='soon';}DB.siz.push({id:uid(),eid:$('#fse').value,item:it,exp:ex,st});cm();render();toast('СИЗ выдан ✅');}
+if(t.id==='bsb'){const r=DB.rooms.find(x=>x.id===t.dataset.r);if(r){const emp=DB.employees.find(e=>e.id===$('#fbe').value);r.beds[parseInt(t.dataset.b)]={n:emp?ini(emp.fio):'??',e:emp?emp.id:null};cm();render();toast('Заселён ✅');}}
 });
 $('#mo').addEventListener('click',function(e){if(e.target===this)cm();});
-$$('.tab').forEach(t=>t.addEventListener('click',()=>sp(t.dataset.p)));
-setInterval(()=>{$('#clock').textContent=new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit',second:'2-digit'});},1000);
-$('#clock').textContent=new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-render();$('#sline').textContent='СФЕРА HR v1.0 · '+DB.candidates.length+' кандидатов · '+DB.employees.length+' сотрудников';
+setInterval(()=>{const el=$('#clock');if(el)el.textContent=new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});},1000);
 </script>
 </body>
 </html>
